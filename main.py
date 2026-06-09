@@ -71,7 +71,22 @@ def register_user(user_id, username):
     conn.commit()
     conn.close()
 
-# --- FASTAPI WEB APP ENDPOINTS ---
+def save_message(user_id, username, text, direction):
+    date_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+    conn, cursor = db_conn()
+    cursor.execute(
+        "INSERT INTO messages (user_id, username, text, direction, date, is_read) VALUES (?, ?, ?, ?, ?, ?)",
+        (user_id, username, text, direction, date_str, 1 if direction == "out" else 0)
+    )
+    conn.commit()
+    conn.close()
+
+def contact_admin_kb():
+    kb = InlineKeyboardMarkup()
+    kb.add(InlineKeyboardButton("💬 Связаться с поддержкой", callback_data="contact_admin"))
+    return kb
+
+# ── FASTAPI ENDPOINTS ──────────────────────────────────────────────
 
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
@@ -99,8 +114,10 @@ async def get_profile(user_id: int):
 @app.get("/api/admin/data")
 async def get_admin_data():
     conn, cursor = db_conn()
-    cursor.execute("SELECT orders.id, orders.username, products.title, orders.type, orders.status, orders.amount, orders.charge_id "
-                   "FROM orders LEFT JOIN products ON orders.product_id = products.id ORDER BY orders.id DESC LIMIT 50")
+    cursor.execute(
+        "SELECT orders.id, orders.username, products.title, orders.type, orders.status, orders.amount, orders.charge_id "
+        "FROM orders LEFT JOIN products ON orders.product_id = products.id ORDER BY orders.id DESC LIMIT 50"
+    )
     txs = [dict(zip(["id", "username", "title", "type", "status", "amount", "charge_id"], r)) for r in cursor.fetchall()]
     cursor.execute("SELECT user_id, username, balance FROM users ORDER BY balance DESC LIMIT 50")
     users = [dict(zip(["user_id", "username", "balance"], r)) for r in cursor.fetchall()]
@@ -126,7 +143,10 @@ async def get_admin_dialogs():
 @app.get("/api/admin/dialog/{user_id}")
 async def get_dialog(user_id: int):
     conn, cursor = db_conn()
-    cursor.execute("SELECT id, user_id, username, text, direction, date FROM messages WHERE user_id=? ORDER BY id ASC", (user_id,))
+    cursor.execute(
+        "SELECT id, user_id, username, text, direction, date FROM messages WHERE user_id=? ORDER BY id ASC",
+        (user_id,)
+    )
     msgs = [dict(zip(["id", "user_id", "username", "text", "direction", "date"], r)) for r in cursor.fetchall()]
     cursor.execute("UPDATE messages SET is_read=1 WHERE user_id=? AND direction='in'", (user_id,))
     conn.commit()
@@ -139,12 +159,7 @@ async def admin_reply(data: dict):
     text = data.get("text", "")
     if not text:
         return JSONResponse({"error": "Пустое сообщение"}, status_code=400)
-    date_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
-    conn, cursor = db_conn()
-    cursor.execute("INSERT INTO messages (user_id, username, text, direction, date, is_read) VALUES (?, 'admin', ?, 'out', ?, 1)",
-                   (target_id, text, date_str))
-    conn.commit()
-    conn.close()
+    save_message(target_id, "admin", text, "out")
     try:
         bot.send_message(target_id, f"💬 *Сообщение от поддержки:*\n\n{text}", parse_mode="Markdown")
     except Exception as e:
@@ -172,37 +187,65 @@ async def buy_item(data: dict):
 
     if pay_type == "balance":
         cursor.execute("SELECT balance FROM users WHERE user_id=?", (user_id,))
-        balance = cursor.fetchone()[0]
-        if balance < price_rub:
+        row = cursor.fetchone()
+        if not row or row[0] < price_rub:
             conn.close()
             return JSONResponse({"error": "Недостаточно баланса"}, status_code=400)
         cursor.execute("UPDATE users SET balance = balance - ? WHERE user_id=?", (price_rub, user_id))
-        cursor.execute("INSERT INTO orders (user_id, username, product_id, status, type, amount, date) VALUES (?, ?, ?, 'paid', 'balance', ?, ?)",
-                       (user_id, username, product_id, price_rub, date_str))
+        cursor.execute(
+            "INSERT INTO orders (user_id, username, product_id, status, type, amount, date) VALUES (?, ?, ?, 'paid', 'balance', ?, ?)",
+            (user_id, username, product_id, price_rub, date_str)
+        )
         conn.commit()
         conn.close()
         if auto_data:
-            bot.send_message(user_id, f"🎉 *Успешная покупка с баланса!*\nТовар '{title}':\n\n`{auto_data}`", parse_mode="Markdown")
+            bot.send_message(
+                user_id,
+                f"🎉 *Покупка с баланса оформлена!*\nТовар: *{title}*\n\n`{auto_data}`",
+                parse_mode="Markdown",
+                reply_markup=contact_admin_kb()
+            )
         else:
-            bot.send_message(user_id, f"🎉 *Оплачено с баланса!*\nТовар: '{title}'\n\nАдмин свяжется для выдачи.")
-            bot.send_message(ADMIN_ID, f"🔔 Юзер @{username} купил '{title}' с баланса. Нужна выдача!")
+            bot.send_message(
+                user_id,
+                f"🎉 *Покупка с баланса оформлена!*\nТовар: *{title}*\n\nАдмин свяжется с вами для выдачи.",
+                parse_mode="Markdown",
+                reply_markup=contact_admin_kb()
+            )
+            bot.send_message(ADMIN_ID, f"🔔 @{username} купил *{title}* с баланса. Нужна выдача!", parse_mode="Markdown")
         return {"status": "success"}
 
     elif pay_type == "stars":
         conn.close()
-        bot.send_invoice(user_id, title, f"Оплата {title}", f"stars_{product_id}", "", "XTR", [LabeledPrice(title, price_stars)])
+        bot.send_invoice(
+            user_id, title, f"Оплата {title}", f"stars_{product_id}", "", "XTR",
+            [LabeledPrice(title, price_stars)]
+        )
         return {"status": "invoice_sent"}
 
     elif pay_type == "yoomoney":
-        cursor.execute("INSERT INTO orders (user_id, username, product_id, status, type, amount, date) VALUES (?, ?, ?, 'pending', 'yoomoney', ?, ?)",
-                       (user_id, username, product_id, price_rub, date_str))
+        cursor.execute(
+            "INSERT INTO orders (user_id, username, product_id, status, type, amount, date) VALUES (?, ?, ?, 'pending', 'yoomoney', ?, ?)",
+            (user_id, username, product_id, price_rub, date_str)
+        )
         order_id = cursor.lastrowid
         conn.commit()
         conn.close()
         kb = InlineKeyboardMarkup()
         kb.add(InlineKeyboardButton("✅ Подтвердить", callback_data=f"confirm_{order_id}"))
         kb.add(InlineKeyboardButton("❌ Отклонить", callback_data=f"decline_{order_id}"))
-        bot.send_message(ADMIN_ID, f"💰 *Заявка ЮMoney №{order_id}*\nЮзер: @{username} ({user_id})\nТовар: {title}\nСумма: {price_rub} руб.", reply_markup=kb, parse_mode="Markdown")
+        bot.send_message(
+            ADMIN_ID,
+            f"💰 *Заявка ЮMoney №{order_id}*\nЮзер: @{username} ({user_id})\nТовар: {title}\nСумма: {price_rub} руб.",
+            reply_markup=kb,
+            parse_mode="Markdown"
+        )
+        bot.send_message(
+            user_id,
+            f"⏳ *Заявка ЮMoney принята!*\nТовар: *{title}*\n\nОжидайте подтверждения администратора.",
+            parse_mode="Markdown",
+            reply_markup=contact_admin_kb()
+        )
         return {"status": "pending"}
 
 @app.post("/api/admin/save-product")
@@ -212,11 +255,15 @@ async def save_product(
 ):
     conn, cursor = db_conn()
     if id == "new":
-        cursor.execute("INSERT INTO products (title, price_stars, price_rub, description, auto_data, media_url) VALUES (?,?,?,?,?,?)",
-                       (title, price_stars, price_rub, description, auto_data, media_url))
+        cursor.execute(
+            "INSERT INTO products (title, price_stars, price_rub, description, auto_data, media_url) VALUES (?,?,?,?,?,?)",
+            (title, price_stars, price_rub, description, auto_data, media_url)
+        )
     else:
-        cursor.execute("UPDATE products SET title=?, price_stars=?, price_rub=?, description=?, auto_data=?, media_url=? WHERE id=?",
-                       (title, price_stars, price_rub, description, auto_data, media_url, int(id)))
+        cursor.execute(
+            "UPDATE products SET title=?, price_stars=?, price_rub=?, description=?, auto_data=?, media_url=? WHERE id=?",
+            (title, price_stars, price_rub, description, auto_data, media_url, int(id))
+        )
     conn.commit()
     conn.close()
     return {"status": "success"}
@@ -229,16 +276,17 @@ async def api_change_balance(user_id: int = Form(...), amount: int = Form(...)):
     conn.commit()
     conn.close()
     try:
-        bot.send_message(user_id, f"💰 Ваш баланс был изменен администратором на *{amount:+} руб.*", parse_mode="Markdown")
-    except: pass
+        bot.send_message(user_id, f"💰 Ваш баланс изменён администратором на *{amount:+} руб.*", parse_mode="Markdown")
+    except:
+        pass
     return {"status": "success"}
 
-# --- TELEGRAM BOT ---
+# ── TELEGRAM BOT ───────────────────────────────────────────────────
 
 @bot.message_handler(commands=['start', 'shop'])
 def cmd_start(message):
     register_user(message.from_user.id, message.from_user.username)
-    bot.reply_to(message, "🌟 Добро пожаловать! Используйте кнопку меню или команду /profile для управления аккаунтом.")
+    bot.reply_to(message, "🌟 Добро пожаловать! Используйте кнопку меню для открытия магазина, или /profile для просмотра аккаунта.")
 
 @bot.message_handler(commands=['profile'])
 def cmd_profile(message):
@@ -248,11 +296,16 @@ def cmd_profile(message):
     res = cursor.fetchone()
     balance = res[0] if res else 0
     conn.close()
-    bot.reply_to(message, f"👤 *Ваш Профиль*\n\nID: `{message.from_user.id}`\nЮзернейм: @{message.from_user.username}\n💰 Баланс: *{balance} руб.*", parse_mode="Markdown")
+    bot.reply_to(
+        message,
+        f"👤 *Ваш Профиль*\n\nID: `{message.from_user.id}`\nЮзернейм: @{message.from_user.username}\n💰 Баланс: *{balance} руб.*",
+        parse_mode="Markdown"
+    )
 
 @bot.message_handler(commands=['setbalance'])
 def cmd_set_balance(message):
-    if message.from_user.id != ADMIN_ID: return
+    if message.from_user.id != ADMIN_ID:
+        return
     try:
         _, t_id, amt = message.text.split()
         conn, cursor = db_conn()
@@ -261,13 +314,14 @@ def cmd_set_balance(message):
         conn.commit()
         conn.close()
         bot.reply_to(message, f"✅ Пользователю `{t_id}` установлен баланс *{amt} руб.*", parse_mode="Markdown")
-        bot.send_message(int(t_id), f"💰 Администратор установил ваш баланс: *{amt} руб.*")
-    except Exception as e:
-        bot.reply_to(message, f"Ошибка. Формат: `/setbalance [user_id] [сумма]`")
+        bot.send_message(int(t_id), f"💰 Администратор установил ваш баланс: *{amt} руб.*", parse_mode="Markdown")
+    except:
+        bot.reply_to(message, "Ошибка. Формат: `/setbalance [user_id] [сумма]`")
 
 @bot.message_handler(commands=['tx'])
 def cmd_tx(message):
-    if message.from_user.id != ADMIN_ID: return
+    if message.from_user.id != ADMIN_ID:
+        return
     conn, cursor = db_conn()
     cursor.execute("SELECT id, username, type, amount, charge_id FROM orders WHERE status='paid' ORDER BY id DESC LIMIT 5")
     rows = cursor.fetchall()
@@ -275,20 +329,23 @@ def cmd_tx(message):
     if not rows:
         bot.reply_to(message, "Транзакций не найдено.")
         return
-    text = "📊 *Последние успешные транзакции:*\n\n"
+    text = "📊 *Последние транзакции:*\n\n"
     for r in rows:
-        text += f"📦 Заказ №{r[0]} | @{r[1]} | {r[2].upper()} | {r[3]} ед.\n`ID для возврата:` `{r[4] or 'N/A'}`\n\n"
+        text += f"📦 №{r[0]} | @{r[1]} | {r[2].upper()} | {r[3]} ед.\n`{r[4] or 'N/A'}`\n\n"
     bot.reply_to(message, text, parse_mode="Markdown")
 
 @bot.message_handler(commands=['dse'])
 def cmd_refund(message):
-    if message.from_user.id != ADMIN_ID: return
+    if message.from_user.id != ADMIN_ID:
+        return
     try:
         _, charge_id = message.text.split()
-        res = apihelper.custom_request(BOT_TOKEN, "refundStarPayment", params={"user_id": ADMIN_ID, "telegram_payment_charge_id": charge_id})
-        bot.reply_to(message, f"✅ Ответ Telegram API на запрос возврата:\n`{res}`", parse_mode="Markdown")
+        res = apihelper.custom_request(BOT_TOKEN, "refundStarPayment", params={
+            "user_id": ADMIN_ID, "telegram_payment_charge_id": charge_id
+        })
+        bot.reply_to(message, f"✅ Ответ API возврата:\n`{res}`", parse_mode="Markdown")
     except Exception as e:
-        bot.reply_to(message, f"❌ Ошибка вызова API возврата: {e}")
+        bot.reply_to(message, f"❌ Ошибка: {e}")
 
 @bot.pre_checkout_query_handler(func=lambda query: True)
 def pre_checkout(query):
@@ -303,12 +360,40 @@ def got_stars_payment(message):
     conn, cursor = db_conn()
     cursor.execute("SELECT title, auto_data, price_stars FROM products WHERE id=?", (product_id,))
     prod = cursor.fetchone()
-    cursor.execute("INSERT INTO orders (user_id, username, product_id, status, type, charge_id, amount, date) VALUES (?, ?, ?, 'paid', 'stars', ?, ?, ?)",
-                   (message.from_user.id, message.from_user.username, product_id, charge_id, pmnt.total_amount, date_str))
+    cursor.execute(
+        "INSERT INTO orders (user_id, username, product_id, status, type, charge_id, amount, date) VALUES (?, ?, ?, 'paid', 'stars', ?, ?, ?)",
+        (message.from_user.id, message.from_user.username, product_id, charge_id, pmnt.total_amount, date_str)
+    )
     conn.commit()
     conn.close()
     if prod:
-        bot.send_message(message.chat.id, f"🎉 *Оплата звездами принята!*\nТовар '{prod[0]}':\n\n`{prod[1] or 'Менеджер свяжется с вами'}`", parse_mode="Markdown")
+        delivery = prod[1] or "Менеджер свяжется с вами в ближайшее время."
+        bot.send_message(
+            message.chat.id,
+            f"🎉 *Оплата звёздами принята!*\nТовар: *{prod[0]}*\n\n`{delivery}`",
+            parse_mode="Markdown",
+            reply_markup=contact_admin_kb()
+        )
+
+@bot.callback_query_handler(func=lambda call: call.data == "contact_admin")
+def handle_contact_admin(call):
+    u = call.from_user
+    register_user(u.id, u.username)
+    save_message(u.id, u.username or str(u.id), "🙋 Пользователь хочет связаться с поддержкой", "in")
+    kb = InlineKeyboardMarkup()
+    kb.add(InlineKeyboardButton("💬 Написать напрямую", url=f"tg://user?id={u.id}"))
+    bot.send_message(
+        ADMIN_ID,
+        f"📩 *Запрос на поддержку*\nОт: @{u.username or 'без ника'} (`{u.id}`)\n\nПользователь нажал «Связаться с поддержкой» после покупки. Напишите ему в диалог!",
+        parse_mode="Markdown",
+        reply_markup=kb
+    )
+    bot.answer_callback_query(call.id, "✅ Запрос отправлен! Скоро с вами свяжутся.")
+    bot.send_message(
+        u.id,
+        "📨 *Ваш запрос принят!*\n\nАдминистратор свяжется с вами в ближайшее время.\nТакже вы можете написать любое сообщение прямо сюда — оно дойдёт до поддержки.",
+        parse_mode="Markdown"
+    )
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith("confirm_") or call.data.startswith("decline_"))
 def handle_admin_callbacks(call):
@@ -319,9 +404,8 @@ def handle_admin_callbacks(call):
     conn, cursor = db_conn()
     cursor.execute("SELECT user_id, username, product_id, amount FROM orders WHERE id=?", (order_id,))
     order = cursor.fetchone()
-
     if not order:
-        bot.answer_callback_query(call.id, "Заказ пропал из БД")
+        bot.answer_callback_query(call.id, "Заказ не найден в БД")
         conn.close()
         return
 
@@ -332,15 +416,26 @@ def handle_admin_callbacks(call):
     if action == "confirm":
         cursor.execute("UPDATE orders SET status='paid' WHERE id=?", (order_id,))
         conn.commit()
-        bot.edit_message_text(f"✅ Заказ №{order_id} подтвержден.", call.message.chat.id, call.message.message_id)
-        bot.send_message(u_id, f"✅ *Ваш платеж ЮMoney подтвержден!*\nТовар '{prod[0]}':\n\n`{prod[1] or 'Ожидайте личного сообщения от админа.'}`", parse_mode="Markdown")
-        bot.answer_callback_query(call.id, "✅ Заказ подтвержден")
+        bot.edit_message_text(f"✅ Заказ №{order_id} подтверждён.", call.message.chat.id, call.message.message_id)
+        delivery = prod[1] if prod and prod[1] else "Ожидайте личного сообщения от администратора."
+        bot.send_message(
+            u_id,
+            f"✅ *Платёж ЮMoney подтверждён!*\nТовар: *{prod[0] if prod else '—'}*\n\n`{delivery}`",
+            parse_mode="Markdown",
+            reply_markup=contact_admin_kb()
+        )
+        bot.answer_callback_query(call.id, "✅ Подтверждено")
     elif action == "decline":
         cursor.execute("UPDATE orders SET status='declined' WHERE id=?", (order_id,))
         conn.commit()
-        bot.edit_message_text(f"❌ Заказ №{order_id} отклонен.", call.message.chat.id, call.message.message_id)
-        bot.send_message(u_id, f"❌ Ваш платеж за товар '{prod[0]}' отклонен. Проверьте реквизиты или напишите в поддержку.")
-        bot.answer_callback_query(call.id, "❌ Заказ отклонен")
+        bot.edit_message_text(f"❌ Заказ №{order_id} отклонён.", call.message.chat.id, call.message.message_id)
+        bot.send_message(
+            u_id,
+            f"❌ Ваш платёж за *{prod[0] if prod else 'товар'}* отклонён.\nПроверьте реквизиты или свяжитесь с поддержкой.",
+            parse_mode="Markdown",
+            reply_markup=contact_admin_kb()
+        )
+        bot.answer_callback_query(call.id, "❌ Отклонено")
     conn.close()
 
 @bot.message_handler(func=lambda msg: True)
@@ -350,23 +445,20 @@ def support_chat(message):
         if message.reply_to_message and message.reply_to_message.text and "User_ID:" in message.reply_to_message.text:
             try:
                 target_id = int(message.reply_to_message.text.split("User_ID:")[1].split("\n")[0].strip())
-                conn, cursor = db_conn()
-                cursor.execute("INSERT INTO messages (user_id, username, text, direction, date, is_read) VALUES (?, 'admin', ?, 'out', ?, 1)",
-                               (target_id, message.text, date_str))
-                conn.commit()
-                conn.close()
+                save_message(target_id, "admin", message.text, "out")
                 bot.send_message(target_id, f"💬 *Сообщение от поддержки:*\n\n{message.text}", parse_mode="Markdown")
                 bot.reply_to(message, "🚀 Отправлено!")
-            except: bot.reply_to(message, "Не удалось спарсить User_ID")
+            except:
+                bot.reply_to(message, "Не удалось спарсить User_ID")
     else:
         register_user(message.from_user.id, message.from_user.username)
-        conn, cursor = db_conn()
-        cursor.execute("INSERT INTO messages (user_id, username, text, direction, date) VALUES (?, ?, ?, 'in', ?)",
-                       (message.from_user.id, message.from_user.username or str(message.from_user.id), message.text, date_str))
-        conn.commit()
-        conn.close()
-        bot.send_message(ADMIN_ID, f"✉️ *Новый тикет!*\nОт: @{message.from_user.username}\nUser_ID: {message.from_user.id}\n\nТекст:\n{message.text}\n\n_(Reply для ответа)_", parse_mode="Markdown")
-        bot.reply_to(message, "📨 Отправлено администратору. Вы получите ответ прямо в этот чат.")
+        save_message(message.from_user.id, message.from_user.username or str(message.from_user.id), message.text, "in")
+        bot.send_message(
+            ADMIN_ID,
+            f"✉️ *Новый тикет!*\nОт: @{message.from_user.username}\nUser_ID: {message.from_user.id}\n\nТекст:\n{message.text}\n\n_(Reply для ответа)_",
+            parse_mode="Markdown"
+        )
+        bot.reply_to(message, "📨 Сообщение отправлено в поддержку. Ответ придёт сюда.")
 
 threading.Thread(target=bot.infinity_polling, daemon=True).start()
 
