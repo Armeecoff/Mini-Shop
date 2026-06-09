@@ -2,250 +2,904 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Shop Pro 3.0</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --bg: #0b0f19;
-            --card: #151f32;
-            --text: #f3f4f6;
-            --accent: #deff9a;
-            --accent-purple: #a855f7;
-            --border: rgba(255, 255, 255, 0.06);
+            --bg:        #0b0918;
+            --bg2:       #120f22;
+            --surface:   #1a1630;
+            --card:      #1e1a35;
+            --card2:     #252040;
+            --border:    rgba(255,255,255,0.07);
+            --border2:   rgba(255,255,255,0.12);
+            --text:      #f0eeff;
+            --muted:     #7b7399;
+            --muted2:    #4e4869;
+            --accent:    #7c3aed;
+            --accent2:   #9d5cf6;
+            --accent3:   #c084fc;
+            --glow:      rgba(124,58,237,0.35);
+            --glow2:     rgba(124,58,237,0.15);
+            --cyan:      #22d3ee;
+            --cyan-dim:  rgba(34,211,238,0.12);
+            --green:     #4ade80;
+            --green-dim: rgba(74,222,128,0.12);
+            --amber:     #fbbf24;
+            --amber-dim: rgba(251,191,36,0.12);
+            --red:       #f87171;
+            --red-dim:   rgba(248,113,113,0.12);
         }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
         body {
-            font-family: -apple-system, system-ui, sans-serif;
-            background-color: var(--bg); color: var(--text);
-            margin: 0; padding: 15px; padding-bottom: 40px;
+            font-family: -apple-system, 'SF Pro Display', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
         }
-        .nav-bar {
-            display: flex; gap: 8px; overflow-x: auto; margin-bottom: 20px;
+
+        /* ── Scrollbar ── */
+        ::-webkit-scrollbar { width: 0; }
+
+        /* ══════════════ BOTTOM TAB BAR ══════════════ */
+        .tab-bar {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            height: 60px;
+            background: rgba(18,15,34,0.92);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid var(--border);
+            display: flex;
+            z-index: 200;
+            padding-bottom: env(safe-area-inset-bottom);
         }
-        .nav-btn {
-            flex: 1; padding: 12px; background: var(--card); border: 1px solid var(--border);
-            color: #9ca3af; border-radius: 10px; font-weight: bold; cursor: pointer; white-space: nowrap;
+        .tab-item {
+            flex: 1; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; gap: 3px;
+            background: none; border: none; cursor: pointer;
+            color: var(--muted2); font-size: 10px; font-weight: 600;
+            letter-spacing: .3px; transition: color .2s; position: relative;
         }
-        .nav-btn.active { background: var(--accent); color: #000; border-color: var(--accent); }
-        
-        .card {
-            background: var(--card); border-radius: 14px; padding: 15px; 
-            margin-bottom: 15px; border: 1px solid var(--border);
+        .tab-item .tab-icon { font-size: 22px; transition: transform .2s; }
+        .tab-item.active { color: var(--accent3); }
+        .tab-item.active .tab-icon { transform: scale(1.12); }
+        .tab-bar-notch {
+            position: absolute; top: -1px; left: 50%; transform: translateX(-50%);
+            width: 36px; height: 2px; border-radius: 0 0 2px 2px;
+            background: var(--accent2); opacity: 0; transition: opacity .2s;
         }
-        .prod-media { width: 100%; height: 160px; object-fit: cover; border-radius: 10px; margin-bottom: 10px; }
-        .price-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
-        
+        .tab-item.active .tab-bar-notch { opacity: 1; }
+        .tab-badge {
+            position: absolute; top: 8px; right: calc(50% - 20px);
+            background: var(--red); color: #fff; border-radius: 10px;
+            font-size: 9px; font-weight: 800; padding: 2px 5px; min-width: 16px; text-align: center;
+            border: 1.5px solid var(--bg);
+        }
+
+        /* ══════════════ PAGES ══════════════ */
+        .page { display: none; padding: 0 0 72px; min-height: 100vh; }
+        .page.active { display: block; }
+
+        /* ══════════════ PAGE TOP ══════════════ */
+        .page-top {
+            padding: 18px 16px 12px;
+            background: linear-gradient(180deg, var(--bg2) 0%, transparent 100%);
+        }
+        .page-eyebrow {
+            font-size: 11px; font-weight: 700; color: var(--muted);
+            text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 4px;
+        }
+        .page-title { font-size: 26px; font-weight: 800; letter-spacing: -.3px; }
+        .page-title span { color: var(--accent3); }
+
+        /* ══════════════ SECTIONS (iOS-style) ══════════════ */
+        .section { margin: 0 16px 8px; }
+        .section-label {
+            font-size: 12px; font-weight: 700; color: var(--muted);
+            text-transform: uppercase; letter-spacing: .8px;
+            padding: 0 4px 6px;
+        }
+        .section-body {
+            background: var(--card);
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+        .cell {
+            display: flex; align-items: center;
+            padding: 13px 16px; gap: 12px;
+            border-bottom: 1px solid var(--border);
+            transition: background .15s; cursor: default;
+        }
+        .cell:last-child { border-bottom: none; }
+        .cell.tappable { cursor: pointer; }
+        .cell.tappable:active { background: var(--card2); }
+        .cell-icon {
+            width: 36px; height: 36px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 17px; flex-shrink: 0;
+        }
+        .cell-content { flex: 1; min-width: 0; }
+        .cell-title { font-size: 15px; font-weight: 600; }
+        .cell-sub { font-size: 12px; color: var(--muted); margin-top: 1px; }
+        .cell-right {
+            color: var(--muted2); font-size: 13px; font-weight: 500;
+            display: flex; align-items: center; gap: 4px; flex-shrink: 0;
+        }
+        .cell-chevron { color: var(--muted2); font-size: 12px; }
+
+        /* ══════════════ PRODUCT CARD ══════════════ */
+        .prod-card {
+            margin: 0 16px 12px;
+            background: var(--card);
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            position: relative;
+        }
+        .prod-glow {
+            position: absolute; top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent2), transparent);
+            opacity: .5;
+        }
+        .prod-media-wrap { position: relative; }
+        .prod-img { width: 100%; height: 190px; object-fit: cover; display: block; }
+        .prod-video { width: 100%; max-height: 260px; display: block; background: #000; }
+        .prod-body { padding: 16px; }
+        .prod-name { font-size: 18px; font-weight: 800; letter-spacing: -.2px; }
+        .prod-desc { font-size: 13px; color: var(--muted); line-height: 1.55; margin: 6px 0 16px; }
+        .prod-prices { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .prod-price-full { margin-top: 8px; }
+
+        /* ══════════════ BUTTONS ══════════════ */
         .btn {
-            padding: 12px; border: none; border-radius: 8px; font-weight: bold;
-            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;
+            width: 100%; padding: 14px; border: none; border-radius: 14px;
+            font-size: 14px; font-weight: 700; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 7px;
+            transition: opacity .15s, transform .1s;
+            letter-spacing: .1px;
         }
-        .btn-stars { background: linear-gradient(135deg, #f59e0b, #b45309); color: white; }
-        .btn-yoo { background: linear-gradient(135deg, var(--accent-purple), #6b21a8); color: white; }
-        .btn-bal { background: #3b82f6; color: white; width: 100%; margin-top: 6px; }
-        .btn-save { background: var(--accent); color: #000; width: 100%; }
-        
-        input, textarea, select {
-            width: 100%; padding: 12px; background: #1e293b; border: 1px solid #334155;
-            color: #fff; border-radius: 8px; margin-bottom: 12px; box-sizing: border-box;
+        .btn:active { opacity: .75; transform: scale(.98); }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+            color: #fff;
+            box-shadow: 0 6px 20px var(--glow);
         }
+        .btn-stars {
+            background: linear-gradient(135deg, #d97706, #92400e);
+            color: #fff;
+            box-shadow: 0 4px 14px rgba(217,119,6,.3);
+        }
+        .btn-yoo {
+            background: linear-gradient(135deg, #7c3aed, #5b21b6);
+            color: #fff;
+            box-shadow: 0 4px 14px rgba(124,58,237,.3);
+        }
+        .btn-blue {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: #fff;
+            box-shadow: 0 4px 14px rgba(37,99,235,.25);
+        }
+        .btn-ghost {
+            background: var(--card2); color: var(--muted);
+            border: 1px solid var(--border2);
+        }
+        .btn-danger { background: var(--red-dim); color: var(--red); border: 1px solid rgba(248,113,113,.2); }
+
+        /* ══════════════ PROFILE ══════════════ */
+        .profile-hero {
+            margin: 0 16px 8px;
+            background: linear-gradient(135deg, #1e1a35 0%, #2a1f4a 100%);
+            border-radius: 22px; border: 1px solid rgba(124,58,237,.2);
+            padding: 24px; text-align: center;
+            position: relative; overflow: hidden;
+        }
+        .profile-hero::before {
+            content: ''; position: absolute; inset: 0;
+            background: radial-gradient(ellipse at 50% 0%, rgba(124,58,237,.25) 0%, transparent 70%);
+        }
+        .profile-avatar {
+            width: 68px; height: 68px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            display: flex; align-items: center; justify-content: center;
+            font-size: 28px; margin: 0 auto 12px; position: relative;
+            box-shadow: 0 0 0 3px rgba(124,58,237,.3), 0 0 20px var(--glow);
+        }
+        .profile-name { font-size: 17px; font-weight: 800; position: relative; }
+        .profile-id { font-size: 12px; color: var(--muted); margin-top: 3px; position: relative; }
+        .balance-row {
+            display: flex; align-items: center; justify-content: center;
+            gap: 8px; margin-top: 16px; position: relative;
+        }
+        .balance-amount {
+            font-size: 38px; font-weight: 900; letter-spacing: -1px;
+            background: linear-gradient(135deg, #e9d5ff, #c084fc);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .balance-currency { font-size: 20px; color: var(--muted); font-weight: 700; margin-top: 8px; }
+
+        /* ══════════════ ORDER ITEM ══════════════ */
+        .order-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 13px 16px; border-bottom: 1px solid var(--border);
+        }
+        .order-item:last-child { border-bottom: none; }
+        .order-type-icon {
+            width: 40px; height: 40px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px; flex-shrink: 0;
+        }
+        .order-info { flex: 1; min-width: 0; }
+        .order-name { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .order-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+        /* ══════════════ BADGE ══════════════ */
         .badge {
-            display: inline-block; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: bold;
+            display: inline-flex; align-items: center;
+            padding: 3px 9px; border-radius: 20px;
+            font-size: 11px; font-weight: 700; flex-shrink: 0;
         }
-        .badge-paid { background: rgba(16, 185, 129, 0.2); color: #10b981; }
-        .badge-pending { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
-        
+        .badge-paid { background: var(--green-dim); color: var(--green); }
+        .badge-pending { background: var(--amber-dim); color: var(--amber); }
+        .badge-declined { background: var(--red-dim); color: var(--red); }
+
+        /* ══════════════ ADMIN HOME ══════════════ */
+        .adm-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 0 16px 8px; }
+        .adm-tile {
+            background: var(--card); border-radius: 18px;
+            border: 1px solid var(--border);
+            padding: 18px 15px; cursor: pointer;
+            transition: border-color .2s, transform .1s;
+            display: flex; flex-direction: column; gap: 10px;
+            position: relative; overflow: hidden;
+        }
+        .adm-tile:active { transform: scale(.97); }
+        .adm-tile::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--tile-color, var(--accent2)), transparent);
+        }
+        .adm-tile-icon { font-size: 28px; }
+        .adm-tile-name { font-size: 14px; font-weight: 800; }
+        .adm-tile-sub { font-size: 11px; color: var(--muted); }
+        .adm-tile.t-purple { --tile-color: #9d5cf6; border-color: rgba(157,92,246,.2); background: linear-gradient(135deg, #1e1a35, #261f44); }
+        .adm-tile.t-cyan   { --tile-color: #22d3ee; border-color: rgba(34,211,238,.15); background: linear-gradient(135deg, #0f1f2a, #122a33); }
+        .adm-tile.t-amber  { --tile-color: #fbbf24; border-color: rgba(251,191,36,.15); background: linear-gradient(135deg, #1f1a0f, #2a2010); }
+        .adm-tile.t-red    { --tile-color: #f87171; border-color: rgba(248,113,113,.15); background: linear-gradient(135deg, #1f100f, #2a1510); }
+
+        /* ══════════════ SUBPAGES ══════════════ */
+        .subpage { display: none; }
+        .subpage.active { display: block; }
+        .subpage-header {
+            display: flex; align-items: center; gap: 10px;
+            padding: 14px 16px 10px;
+        }
+        .back-btn {
+            width: 34px; height: 34px; border-radius: 10px;
+            background: var(--card2); border: 1px solid var(--border2);
+            color: var(--text); font-size: 15px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .subpage-title { font-size: 19px; font-weight: 800; }
+
+        /* ══════════════ FORM ══════════════ */
+        .form-section { margin: 0 16px 12px; }
+        .form-label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; padding: 0 4px 5px; display: block; }
+        .form-body { background: var(--card); border-radius: 16px; border: 1px solid var(--border); overflow: hidden; }
+        .form-field {
+            display: flex; flex-direction: column; padding: 12px 14px;
+            border-bottom: 1px solid var(--border);
+        }
+        .form-field:last-child { border-bottom: none; }
+        .field-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+        input, textarea, select {
+            background: transparent; border: none; outline: none;
+            color: var(--text); font-size: 15px; font-family: inherit; width: 100%;
+        }
+        textarea { resize: none; }
+        input::placeholder, textarea::placeholder { color: var(--muted2); }
+        .form-2col { display: grid; grid-template-columns: 1fr 1fr; }
+        .form-2col .form-field:not(:last-child) { border-right: 1px solid var(--border); border-bottom: none; }
+        .form-2col .form-field { border-bottom: 1px solid var(--border); }
+        .form-2col + .form-field { border-bottom: none; }
+
+        /* ══════════════ TX / AUDIT ══════════════ */
+        .tx-item {
+            padding: 13px 16px; border-bottom: 1px solid var(--border);
+        }
+        .tx-item:last-child { border-bottom: none; }
+        .tx-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+        .tx-name { font-size: 14px; font-weight: 700; flex: 1; }
+        .tx-meta { font-size: 12px; color: var(--muted); margin-top: 4px; }
+        .tx-id { font-size: 10px; color: var(--muted2); font-family: monospace; margin-top: 3px; }
+
+        /* ══════════════ DIALOGS ══════════════ */
+        .dialog-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 13px 16px; border-bottom: 1px solid var(--border);
+            cursor: pointer; transition: background .15s;
+        }
+        .dialog-item:last-child { border-bottom: none; }
+        .dialog-item:active { background: var(--card2); }
+        .dialog-ava {
+            width: 46px; height: 46px; border-radius: 50%; flex-shrink: 0;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            display: flex; align-items: center; justify-content: center;
+            font-size: 19px; box-shadow: 0 2px 10px var(--glow2);
+        }
+        .dialog-info { flex: 1; min-width: 0; }
+        .dialog-name { font-size: 15px; font-weight: 700; }
+        .dialog-last { font-size: 12px; color: var(--muted); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .dialog-badge {
+            width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0;
+            background: var(--accent2); color: #fff; font-size: 10px; font-weight: 800;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .dialog-time { font-size: 11px; color: var(--muted2); }
+
+        /* ══════════════ CHAT ══════════════ */
+        .chat-messages {
+            display: flex; flex-direction: column; gap: 6px;
+            padding: 12px 16px 80px;
+        }
+        .msg-wrap { display: flex; flex-direction: column; }
+        .msg-wrap.out { align-items: flex-end; }
+        .msg-bubble {
+            max-width: 78%; padding: 10px 14px;
+            font-size: 14px; line-height: 1.5; border-radius: 18px;
+        }
+        .msg-in {
+            background: var(--card2); border: 1px solid var(--border2);
+            border-bottom-left-radius: 4px; align-self: flex-start;
+        }
+        .msg-out {
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            color: #fff; border-bottom-right-radius: 4px;
+            box-shadow: 0 3px 12px var(--glow);
+        }
+        .msg-time { font-size: 10px; color: var(--muted2); margin-top: 3px; padding: 0 2px; }
+        .chat-input-bar {
+            position: fixed; bottom: 60px; left: 0; right: 0;
+            padding: 10px 12px;
+            background: rgba(11,9,24,.9);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid var(--border);
+            display: flex; gap: 8px; align-items: center;
+        }
+        .chat-input {
+            flex: 1; background: var(--card2); border: 1px solid var(--border2);
+            border-radius: 22px; padding: 10px 16px;
+            color: var(--text); font-size: 14px; outline: none;
+            font-family: inherit;
+        }
+        .chat-send {
+            width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            border: none; cursor: pointer; font-size: 17px;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 3px 10px var(--glow); color: #fff;
+        }
+
+        /* ══════════════ UTILITY ══════════════ */
         .hidden { display: none !important; }
+        .spacer { height: 14px; }
+        .empty {
+            text-align: center; padding: 48px 20px; color: var(--muted);
+        }
+        .empty-icon { font-size: 44px; margin-bottom: 12px; opacity: .6; }
+        .empty p { font-size: 14px; line-height: 1.6; }
+
+        /* ── User list ── */
+        .user-row {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 13px 16px; border-bottom: 1px solid var(--border);
+        }
+        .user-row:last-child { border-bottom: none; }
+        .user-name { font-size: 14px; font-weight: 700; }
+        .user-id-text { font-size: 11px; color: var(--muted); margin-top: 2px; }
+        .user-bal-val { font-size: 16px; font-weight: 900; color: var(--accent3); }
     </style>
 </head>
 <body>
 
-    <div class="nav-bar">
-        <button class="nav-btn active" onclick="switchTab('shop')">🛒 Витрина</button>
-        <button class="nav-btn" onclick="switchTab('profile')">👤 Профиль</button>
-        <button class="nav-btn hidden" id="adm-tab-btn" onclick="switchTab('admin')">🛡️ Админка</button>
+<!-- ═══════════════════════════ SHOP ═══════════════════════════ -->
+<div id="page-shop" class="page active">
+    <div class="page-top">
+        <div class="page-eyebrow">Каталог товаров</div>
+        <div class="page-title">Витрина <span>✦</span></div>
     </div>
+    <div class="spacer"></div>
 
-    <div id="tab-shop">
-        {% for p in products %}
-        <div class="card">
-            {% if p.media %}
-                <img src="{{ p.media }}" class="prod-media">
+    {% for p in products %}
+    <div class="prod-card">
+        <div class="prod-glow"></div>
+        {% if p.media %}
+        <div class="prod-media-wrap">
+            {% set ext = p.media.split('?')[0].rsplit('.', 1)[-1].lower() %}
+            {% if ext in ['mp4','webm','ogg','mov'] %}
+                <video class="prod-video" controls playsinline preload="metadata">
+                    <source src="{{ p.media }}" type="video/{{ ext if ext != 'mov' else 'mp4' }}">
+                </video>
+            {% else %}
+                <img src="{{ p.media }}" class="prod-img" onerror="this.style.display='none'">
             {% endif %}
-            <div style="font-size: 18px; font-weight: bold;">{{ p.title }}</div>
-            <div style="font-size: 14px; color: #9ca3af; margin-top: 6px;">{{ p.desc }}</div>
-            
-            <div class="price-grid">
-                <button class="btn btn-stars" onclick="triggerPayment('{{p.id}}', 'stars')">⭐ {{ p.stars }} Stars</button>
-                <button class="btn btn-yoo" onclick="triggerPayment('{{p.id}}', 'yoomoney')">💳 ЮMoney ({{ p.rub }}₽)</button>
+        </div>
+        {% endif %}
+        <div class="prod-body">
+            <div class="prod-name">{{ p.title }}</div>
+            <div class="prod-desc">{{ p.desc }}</div>
+            <div class="prod-prices">
+                <button class="btn btn-stars" onclick="triggerPayment('{{p.id}}','stars')">⭐ {{p.stars}} Stars</button>
+                <button class="btn btn-yoo" onclick="triggerPayment('{{p.id}}','yoomoney')">💳 {{p.rub}} ₽</button>
             </div>
-            <button class="btn btn-bal" onclick="triggerPayment('{{p.id}}', 'balance')">👛 Купить с баланса ({{ p.rub }}₽)</button>
-            <button class="btn hidden admin-only" style="background:#475569; color:#fff; width:100%; margin-top:6px;" onclick="loadEditProduct({{ p | tojson }})">✏️ Редактировать</button>
+            <div class="prod-price-full">
+                <button class="btn btn-blue" onclick="triggerPayment('{{p.id}}','balance')">👛 С баланса — {{p.rub}} ₽</button>
+            </div>
+            <button class="btn btn-ghost hidden admin-only" style="margin-top:8px;" onclick="openAdminEditProduct({{ p | tojson }})">✏️ Редактировать</button>
         </div>
-        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty">
+        <div class="empty-icon">📦</div>
+        <p>Товаров пока нет.<br>Добавьте их в разделе «Админка».</p>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- ═══════════════════════════ PROFILE ═══════════════════════════ -->
+<div id="page-profile" class="page">
+    <div class="page-top">
+        <div class="page-eyebrow">Ваш аккаунт</div>
+        <div class="page-title">Профиль</div>
+    </div>
+    <div class="spacer"></div>
+
+    <div class="profile-hero">
+        <div class="profile-avatar">👤</div>
+        <div class="profile-name" id="prof-name">—</div>
+        <div class="profile-id">ID: <span id="prof-id">—</span></div>
+        <div class="balance-row">
+            <div class="balance-amount" id="prof-balance">0</div>
+            <div class="balance-currency">₽</div>
+        </div>
     </div>
 
-    <div id="tab-profile" class="hidden">
-        <div class="card" style="text-align: center;">
-            <div style="color: #9ca3af; font-size: 14px;">Ваш внутренний баланс</div>
-            <div id="prof-balance" style="font-size: 36px; font-weight: bold; color: var(--accent); margin: 8px 0;">0 ₽</div>
-            <div style="font-size: 11px; color: #6b7280;">ID аккаунта: <span id="prof-id">0</span></div>
+    <div class="spacer"></div>
+    <div class="section">
+        <div class="section-label">История заказов</div>
+        <div class="section-body" id="history-box">
+            <div class="empty"><div class="empty-icon" style="font-size:28px;">🧾</div><p>Загрузка…</p></div>
         </div>
-        <h3>История ваших заказов</h3>
-        <div id="history-box"></div>
     </div>
+</div>
 
-    <div id="tab-admin" class="hidden">
-        <div class="card">
-            <h3 style="margin-top:0;">Выдача / Корректировка баланса</h3>
-            <input type="number" id="adm-user-id" placeholder="ID пользователя в Telegram">
-            <input type="number" id="adm-amount" placeholder="Сумма (например, 500 или -200)">
-            <button class="btn btn-save" onclick="adjustBalance()">⚡ Применить баланс</button>
+<!-- ═══════════════════════════ ADMIN ═══════════════════════════ -->
+<div id="page-admin" class="page">
+
+    <!-- ── ADMIN HOME ── -->
+    <div id="adm-home" class="subpage active">
+        <div class="page-top">
+            <div class="page-eyebrow">Панель управления</div>
+            <div class="page-title">Админка <span style="color:var(--accent3)">🛡</span></div>
         </div>
-
-        <div class="card">
-            <h3 id="form-header" style="margin-top:0;">Добавить товар</h3>
-            <form id="product-form">
-                <input type="hidden" id="form-prod-id" value="new">
-                <input type="text" id="form-title" placeholder="Название товара" required>
-                <input type="number" id="form-stars" placeholder="Цена в Stars" required>
-                <input type="number" id="form-rub" placeholder="Цена в Рублях" required>
-                <textarea id="form-desc" placeholder="Описание товара" rows="3" required></textarea>
-                <textarea id="form-data" placeholder="Данные автовыдачи (ключи, файлы)" rows="2"></textarea>
-                <input type="url" id="form-media" placeholder="Ссылка на картинку карточки (URL)">
-                <button type="button" class="btn btn-save" onclick="submitProductForm()">💾 Сохранить в каталог</button>
-                <button type="button" class="btn hidden" id="btn-cancel" style="background:#4b5563; color:#fff; width:100%; margin-top:6px;" onclick="clearForm()">Отмена</button>
-            </form>
-        </div>
-
-        <h3>Последние действия (Аудит)</h3>
-        <div id="adm-tx-log"></div>
-    </div>
-
-    <script>
-        const tg = window.Telegram.WebApp;
-        tg.ready(); tg.expand();
-
-        const user = tg.initDataUnsafe.user || { id: 0, username: "local_dev" };
-        const ADMIN_ID = {{ admin_id }};
-
-        if (user.id === ADMIN_ID || user.id === 0) {
-            document.getElementById("adm-tab-btn").classList.remove("hidden");
-            document.querySelectorAll(".admin-only").forEach(el => el.classList.remove("hidden"));
-        }
-
-        function switchTab(name) {
-            document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
-            event.target.classList.add("active");
-            
-            ['shop', 'profile', 'admin'].forEach(t => document.getElementById('tab-'+t).classList.add('hidden'));
-            document.getElementById('tab-'+name).classList.remove('hidden');
-
-            if (name === 'profile') fetchProfile();
-            if (name === 'admin') fetchAdminDashboard();
-        }
-
-        async function fetchProfile() {
-            document.getElementById("prof-id").innerText = user.id;
-            let r = await fetch('/api/profile/' + user.id);
-            let d = await r.json();
-            document.getElementById("prof-balance").innerText = d.balance + " ₽";
-            
-            document.getElementById("history-box").innerHTML = d.history.map(h => `
-                <div class="card">
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <b>${h.title || 'Пополнение'}</b>
-                        <span class="badge ${h.status==='paid'?'badge-paid':'badge-pending'}">${h.status.toUpperCase()}</span>
-                    </div>
-                    <div style="font-size:12px; color:#9ca3af; margin-top:6px;">
-                        Тип: ${h.type.toUpperCase()} | Сумма: ${h.amount} | Дата: ${h.date}
-                    </div>
-                    ${h.charge_id ? `<div style="font-size:10px; color:#6b7280; font-family:monospace; margin-top:4px;">TX: ${h.charge_id}</div>` : ''}
+        <div class="spacer"></div>
+        <div class="adm-grid">
+            <div class="adm-tile t-purple" onclick="openAdm('products')">
+                <div class="adm-tile-icon">📦</div>
+                <div>
+                    <div class="adm-tile-name">Товары</div>
+                    <div class="adm-tile-sub">Добавить / изменить</div>
                 </div>
-            `).join('') || '<p style="color:#6b7280;">История покупок пуста</p>';
-        }
-
-        async function fetchAdminDashboard() {
-            let r = await fetch('/api/admin/data');
-            let d = await r.json();
-            document.getElementById("adm-tx-log").innerHTML = d.transactions.map(t => `
-                <div class="card" style="font-size:13px;">
-                    <b>Заказ #${t.id}</b> от @${t.username}<br>
-                    Товар: ${t.title || 'Внешнее изменение'}<br>
-                    Шлюз: ${t.type.toUpperCase()} | Статус: <span style="color:${t.status==='paid'?'#10b981':'#f59e0b'}">${t.status}</span><br>
-                    ${t.charge_id ? `<code>ID: ${t.charge_id}</code>` : ''}
+            </div>
+            <div class="adm-tile t-cyan" onclick="openAdm('dialogs')">
+                <div class="adm-tile-icon">💬</div>
+                <div>
+                    <div class="adm-tile-name">Диалоги</div>
+                    <div class="adm-tile-sub" id="adm-dialog-hint">Поддержка</div>
                 </div>
-            `).join('');
-        }
+            </div>
+            <div class="adm-tile t-amber" onclick="openAdm('balance')">
+                <div class="adm-tile-icon">💰</div>
+                <div>
+                    <div class="adm-tile-name">Балансы</div>
+                    <div class="adm-tile-sub">Пополнить / списать</div>
+                </div>
+            </div>
+            <div class="adm-tile t-red" onclick="openAdm('audit')">
+                <div class="adm-tile-icon">📊</div>
+                <div>
+                    <div class="adm-tile-name">Аудит</div>
+                    <div class="adm-tile-sub">Транзакции</div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        async function triggerPayment(prodId, type) {
-            if (type === 'yoomoney') {
-                window.open("https://yoomoney.ru/fundraise/1HSLJ8JGS6P.260520", "_blank");
-                tg.showPopup({
-                    title: '💳 Оплата ЮMoney',
-                    message: 'Переведите сумму на кошелек. После успешного списания нажмите кнопку ниже для отправки чека админу.',
-                    buttons: [{id: 'paid', type: 'default', text: '✅ Я оплатил'}, {type: 'cancel', text: 'Отмена'}]
-                }, function(btn) {
-                    if (btn === 'paid') executePurchaseRequest(prodId, 'yoomoney');
-                });
-            } else {
-                executePurchaseRequest(prodId, type);
-            }
-        }
+    <!-- ── PRODUCTS ── -->
+    <div id="adm-products" class="subpage">
+        <div class="subpage-header">
+            <button class="back-btn" onclick="closeAdm()">‹</button>
+            <div class="subpage-title">📦 Товары</div>
+        </div>
+        <div class="form-section">
+            <div class="form-label" id="form-header">Новый товар</div>
+            <div class="form-body">
+                <div class="form-field">
+                    <div class="field-label">Название</div>
+                    <input id="form-title" placeholder="Например: VPN Premium" type="text">
+                </div>
+                <div class="form-2col">
+                    <div class="form-field">
+                        <div class="field-label">Stars</div>
+                        <input id="form-stars" placeholder="100" type="number">
+                    </div>
+                    <div class="form-field">
+                        <div class="field-label">Рублей ₽</div>
+                        <input id="form-rub" placeholder="350" type="number">
+                    </div>
+                </div>
+                <div class="form-field">
+                    <div class="field-label">Описание</div>
+                    <textarea id="form-desc" rows="3" placeholder="Опишите товар..."></textarea>
+                </div>
+                <div class="form-field">
+                    <div class="field-label">Данные автовыдачи</div>
+                    <textarea id="form-data" rows="2" placeholder="Ключи, ссылки..."></textarea>
+                </div>
+                <div class="form-field">
+                    <div class="field-label">Медиа URL (картинка или .mp4)</div>
+                    <input id="form-media" placeholder="https://..." type="url">
+                </div>
+            </div>
+            <input type="hidden" id="form-prod-id" value="new">
+        </div>
+        <div style="padding: 0 16px; display:flex; flex-direction:column; gap:8px;">
+            <button class="btn btn-primary" onclick="submitProductForm()">💾 Сохранить товар</button>
+            <button class="btn btn-ghost hidden" id="btn-cancel" onclick="clearProductForm()">✕ Отмена редактирования</button>
+        </div>
+    </div>
 
-        async function executePurchaseRequest(prodId, type) {
-            let res = await fetch("/api/buy", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ user_id: user.id, username: user.username, product_id: prodId, type: type })
-            });
-            let d = await res.json();
-            if (d.error) { tg.showAlert("Ошибка: " + d.error); }
-            else if (d.status === "invoice_sent") { tg.close(); }
-            else { tg.showAlert("Успешно обработано! Проверьте статус в профиле или диалоге с ботом."); }
-        }
+    <!-- ── DIALOGS LIST ── -->
+    <div id="adm-dialogs" class="subpage">
+        <div class="subpage-header">
+            <button class="back-btn" onclick="closeAdm()">‹</button>
+            <div class="subpage-title">💬 Диалоги</div>
+        </div>
+        <div class="section">
+            <div class="section-body" id="dialogs-list">
+                <div class="empty"><div class="empty-icon" style="font-size:28px;">💬</div><p>Загрузка…</p></div>
+            </div>
+        </div>
+    </div>
 
-        function loadEditProduct(p) {
-            switchTab('admin');
-            document.getElementById("form-header").innerText = "Редактировать: " + p.title;
-            document.getElementById("form-prod-id").value = p.id;
-            document.getElementById("form-title").value = p.title;
-            document.getElementById("form-stars").value = p.stars;
-            document.getElementById("form-rub").value = p.rub;
-            document.getElementById("form-desc").value = p.desc;
-            document.getElementById("form-data").value = p.data || "";
-            document.getElementById("form-media").value = p.media || "";
-            document.getElementById("btn-cancel").classList.remove("hidden");
-        }
+    <!-- ── CHAT ── -->
+    <div id="adm-chat" class="subpage">
+        <div class="subpage-header">
+            <button class="back-btn" onclick="openAdm('dialogs')">‹</button>
+            <div class="subpage-title" id="chat-title">Чат</div>
+        </div>
+        <div class="chat-messages" id="chat-messages"></div>
+        <div class="chat-input-bar">
+            <input class="chat-input" id="reply-input" placeholder="Написать ответ…" onkeydown="if(event.key==='Enter')sendReply()">
+            <button class="chat-send" onclick="sendReply()">↑</button>
+        </div>
+    </div>
 
-        function clearForm() {
-            document.getElementById("form-header").innerText = "Добавить товар";
-            document.getElementById("product-form").reset();
-            document.getElementById("form-prod-id").value = "new";
-            document.getElementById("btn-cancel").classList.add("hidden");
-        }
+    <!-- ── BALANCE ── -->
+    <div id="adm-balance" class="subpage">
+        <div class="subpage-header">
+            <button class="back-btn" onclick="closeAdm()">‹</button>
+            <div class="subpage-title">💰 Балансы</div>
+        </div>
+        <div class="form-section">
+            <div class="form-label">Корректировка баланса</div>
+            <div class="form-body">
+                <div class="form-field">
+                    <div class="field-label">ID пользователя Telegram</div>
+                    <input id="adm-user-id" placeholder="123456789" type="number">
+                </div>
+                <div class="form-field">
+                    <div class="field-label">Сумма (+ пополнение, − списание)</div>
+                    <input id="adm-amount" placeholder="500 или -200" type="number">
+                </div>
+            </div>
+        </div>
+        <div style="padding: 0 16px;">
+            <button class="btn btn-primary" onclick="adjustBalance()">⚡ Применить изменение</button>
+        </div>
+    </div>
 
-        async function submitProductForm() {
-            let fd = new FormData();
-            fd.append("id", document.getElementById("form-prod-id").value);
-            fd.append("title", document.getElementById("form-title").value);
-            fd.append("price_stars", document.getElementById("form-stars").value);
-            fd.append("price_rub", document.getElementById("form-rub").value);
-            fd.append("description", document.getElementById("form-desc").value);
-            fd.append("auto_data", document.getElementById("form-data").value);
-            fd.append("media_url", document.getElementById("form-media").value);
+    <!-- ── AUDIT ── -->
+    <div id="adm-audit" class="subpage">
+        <div class="subpage-header">
+            <button class="back-btn" onclick="closeAdm()">‹</button>
+            <div class="subpage-title">📊 Аудит</div>
+        </div>
+        <div class="section">
+            <div class="section-label">Транзакции</div>
+            <div class="section-body" id="adm-tx-log">
+                <div class="empty"><div class="empty-icon" style="font-size:28px;">📊</div><p>Загрузка…</p></div>
+            </div>
+        </div>
+        <div class="spacer"></div>
+        <div class="section">
+            <div class="section-label">Топ по балансу</div>
+            <div class="section-body" id="adm-users-list">
+                <div class="empty"><div class="empty-icon" style="font-size:28px;">👥</div><p>Загрузка…</p></div>
+            </div>
+        </div>
+    </div>
 
-            await fetch("/api/admin/save-product", { method: "POST", body: fd });
-            clearForm();
-            location.reload();
-        }
+</div>
 
-        async function adjustBalance() {
-            let fd = new FormData();
-            fd.append("user_id", document.getElementById("adm-user-id").value);
-            fd.append("amount", document.getElementById("adm-amount").value);
-            let r = await fetch("/api/admin/change-balance", { method: "POST", body: fd });
-            if (r.ok) { tg.showAlert("Баланс обновлен!"); fetchAdminDashboard(); }
+<!-- ═══════════════════════════ TAB BAR ═══════════════════════════ -->
+<nav class="tab-bar">
+    <button class="tab-item active" id="tab-shop" onclick="switchPage('shop',this)">
+        <div class="tab-bar-notch"></div>
+        <span class="tab-icon">🛒</span>Витрина
+    </button>
+    <button class="tab-item" id="tab-profile" onclick="switchPage('profile',this)">
+        <div class="tab-bar-notch"></div>
+        <span class="tab-icon">👤</span>Профиль
+    </button>
+    <button class="tab-item hidden" id="tab-admin" onclick="switchPage('admin',this)">
+        <div class="tab-bar-notch"></div>
+        <span class="tab-icon">🛡️</span>Админка
+        <span class="tab-badge hidden" id="admin-badge"></span>
+    </button>
+</nav>
+
+<script>
+    const tg = window.Telegram.WebApp;
+    tg.ready(); tg.expand();
+    const user = tg.initDataUnsafe.user || { id: 0, username: "dev_user", first_name: "Dev" };
+    const ADMIN_ID = {{ admin_id }};
+    let currentChatUserId = null;
+
+    if (user.id === ADMIN_ID || user.id === 0) {
+        document.getElementById("tab-admin").classList.remove("hidden");
+        document.querySelectorAll(".admin-only").forEach(el => el.classList.remove("hidden"));
+    }
+
+    /* ─── PAGES ─── */
+    function switchPage(name, btn) {
+        document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+        document.querySelectorAll(".tab-item").forEach(b => b.classList.remove("active"));
+        document.getElementById("page-" + name).classList.add("active");
+        btn.classList.add("active");
+        if (name === "profile") fetchProfile();
+        if (name === "admin") { showAdmHome(); fetchDialogsBadge(); }
+    }
+
+    /* ─── ADMIN SUBPAGES ─── */
+    function showAdmHome() {
+        document.querySelectorAll("#page-admin .subpage").forEach(s => s.classList.remove("active"));
+        document.getElementById("adm-home").classList.add("active");
+    }
+    function openAdm(section) {
+        document.querySelectorAll("#page-admin .subpage").forEach(s => s.classList.remove("active"));
+        document.getElementById("adm-" + section).classList.add("active");
+        if (section === "dialogs") loadDialogs();
+        if (section === "audit") loadAudit();
+    }
+    function closeAdm() { showAdmHome(); }
+
+    function openAdminEditProduct(p) {
+        switchPage("admin", document.getElementById("tab-admin"));
+        openAdm("products");
+        document.getElementById("form-header").innerText = "Редактировать: " + p.title;
+        document.getElementById("form-prod-id").value = p.id;
+        document.getElementById("form-title").value = p.title;
+        document.getElementById("form-stars").value = p.stars;
+        document.getElementById("form-rub").value = p.rub;
+        document.getElementById("form-desc").value = p.desc;
+        document.getElementById("form-data").value = p.data || "";
+        document.getElementById("form-media").value = p.media || "";
+        document.getElementById("btn-cancel").classList.remove("hidden");
+    }
+
+    /* ─── PROFILE ─── */
+    async function fetchProfile() {
+        document.getElementById("prof-id").innerText = user.id;
+        document.getElementById("prof-name").innerText = (user.first_name || "") + (user.last_name ? " " + user.last_name : "") || "@" + user.username;
+        const r = await fetch("/api/profile/" + user.id);
+        const d = await r.json();
+        document.getElementById("prof-balance").innerText = d.balance;
+
+        const typeIcon = { stars: "⭐", yoomoney: "💳", balance: "👛" };
+        const typeBg = { stars: "rgba(217,119,6,.15)", yoomoney: "rgba(124,58,237,.15)", balance: "rgba(37,99,235,.15)" };
+        document.getElementById("history-box").innerHTML = d.history.length
+            ? d.history.map(h => `
+                <div class="order-item">
+                    <div class="order-type-icon" style="background:${typeBg[h.type]||'var(--card2)'}">
+                        ${typeIcon[h.type] || "📦"}
+                    </div>
+                    <div class="order-info">
+                        <div class="order-name">${h.title || "Операция"}</div>
+                        <div class="order-meta">${h.type.toUpperCase()} · ${h.amount} · ${h.date}</div>
+                        ${h.charge_id ? `<div style="font-size:10px;color:var(--muted2);font-family:monospace;margin-top:2px;">${h.charge_id}</div>` : ""}
+                    </div>
+                    <span class="badge badge-${h.status === 'paid' ? 'paid' : h.status === 'declined' ? 'declined' : 'pending'}">
+                        ${h.status === "paid" ? "✓ Оплачен" : h.status === "declined" ? "✗ Откл." : "⏳"}
+                    </span>
+                </div>
+            `).join("")
+            : `<div class="empty"><div class="empty-icon" style="font-size:28px;">🧾</div><p>Заказов пока нет</p></div>`;
+    }
+
+    /* ─── DIALOGS BADGE ─── */
+    async function fetchDialogsBadge() {
+        const r = await fetch("/api/admin/dialogs");
+        const d = await r.json();
+        const unread = d.dialogs.reduce((s, dl) => s + (dl.unread || 0), 0);
+        const badge = document.getElementById("admin-badge");
+        if (unread > 0) {
+            badge.classList.remove("hidden");
+            badge.innerText = unread;
+            document.getElementById("adm-dialog-hint").innerText = unread + " непрочит.";
+        } else {
+            badge.classList.add("hidden");
+            document.getElementById("adm-dialog-hint").innerText = "Поддержка";
         }
-    </script>
+    }
+
+    /* ─── DIALOGS ─── */
+    async function loadDialogs() {
+        const r = await fetch("/api/admin/dialogs");
+        const d = await r.json();
+        document.getElementById("dialogs-list").innerHTML = d.dialogs.length
+            ? d.dialogs.map(dl => `
+                <div class="dialog-item" onclick="openChat(${dl.user_id},'@${dl.username || dl.user_id}')">
+                    <div class="dialog-ava">👤</div>
+                    <div class="dialog-info">
+                        <div class="dialog-name">@${dl.username || dl.user_id}</div>
+                        <div class="dialog-last">${dl.last_msg || "—"}</div>
+                    </div>
+                    ${dl.unread > 0
+                        ? `<div class="dialog-badge">${dl.unread}</div>`
+                        : `<div class="dialog-time">${dl.last_date ? dl.last_date.split(" ")[1] : ""}</div>`}
+                </div>
+            `).join("")
+            : `<div class="empty"><div class="empty-icon" style="font-size:28px;">💬</div><p>Диалогов нет.<br>Пользователи ещё не писали боту.</p></div>`;
+    }
+
+    async function openChat(userId, label) {
+        currentChatUserId = userId;
+        document.getElementById("chat-title").innerText = label;
+        openAdm("chat");
+        await refreshChat();
+    }
+
+    async function refreshChat() {
+        if (!currentChatUserId) return;
+        const r = await fetch("/api/admin/dialog/" + currentChatUserId);
+        const d = await r.json();
+        const box = document.getElementById("chat-messages");
+        box.innerHTML = d.messages.length
+            ? d.messages.map(m => `
+                <div class="msg-wrap ${m.direction === "out" ? "out" : ""}">
+                    <div class="msg-bubble msg-${m.direction === "in" ? "in" : "out"}">${esc(m.text)}</div>
+                    <div class="msg-time">${m.date}</div>
+                </div>
+            `).join("")
+            : `<div class="empty"><div class="empty-icon" style="font-size:28px;">💬</div><p>Нет сообщений</p></div>`;
+        box.scrollTop = box.scrollHeight;
+    }
+
+    async function sendReply() {
+        const input = document.getElementById("reply-input");
+        const text = input.value.trim();
+        if (!text || !currentChatUserId) return;
+        input.value = "";
+        const r = await fetch("/api/admin/reply", {
+            method: "POST", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ user_id: currentChatUserId, text })
+        });
+        const d = await r.json();
+        if (d.error) { tg.showAlert("Ошибка: " + d.error); input.value = text; return; }
+        await refreshChat();
+    }
+
+    /* ─── AUDIT ─── */
+    async function loadAudit() {
+        const r = await fetch("/api/admin/data");
+        const d = await r.json();
+
+        document.getElementById("adm-tx-log").innerHTML = d.transactions.length
+            ? d.transactions.map(t => `
+                <div class="tx-item">
+                    <div class="tx-top">
+                        <div class="tx-name">Заказ #${t.id} — @${t.username}</div>
+                        <span class="badge badge-${t.status === "paid" ? "paid" : t.status === "declined" ? "declined" : "pending"}">
+                            ${t.status === "paid" ? "✓ Оплачен" : t.status === "declined" ? "✗ Откл." : "⏳ Ожид."}
+                        </span>
+                    </div>
+                    <div class="tx-meta">${t.title || "—"} · ${t.type.toUpperCase()} · ${t.amount} ед.</div>
+                    ${t.charge_id ? `<div class="tx-id">TX: ${t.charge_id}</div>` : ""}
+                </div>
+            `).join("")
+            : `<div class="empty"><div class="empty-icon" style="font-size:28px;">📊</div><p>Транзакций нет</p></div>`;
+
+        document.getElementById("adm-users-list").innerHTML = d.users.length
+            ? d.users.map(u => `
+                <div class="user-row">
+                    <div>
+                        <div class="user-name">@${u.username || "unknown"}</div>
+                        <div class="user-id-text">ID: ${u.user_id}</div>
+                    </div>
+                    <div class="user-bal-val">${u.balance} ₽</div>
+                </div>
+            `).join("")
+            : `<div class="empty"><div class="empty-icon" style="font-size:28px;">👥</div><p>Пользователей нет</p></div>`;
+    }
+
+    /* ─── PRODUCT FORM ─── */
+    function clearProductForm() {
+        document.getElementById("form-header").innerText = "Новый товар";
+        ["form-title","form-stars","form-rub","form-desc","form-data","form-media"].forEach(id => document.getElementById(id).value = "");
+        document.getElementById("form-prod-id").value = "new";
+        document.getElementById("btn-cancel").classList.add("hidden");
+    }
+
+    async function submitProductForm() {
+        const fd = new FormData();
+        fd.append("id", document.getElementById("form-prod-id").value);
+        fd.append("title", document.getElementById("form-title").value);
+        fd.append("price_stars", document.getElementById("form-stars").value);
+        fd.append("price_rub", document.getElementById("form-rub").value);
+        fd.append("description", document.getElementById("form-desc").value);
+        fd.append("auto_data", document.getElementById("form-data").value);
+        fd.append("media_url", document.getElementById("form-media").value);
+        await fetch("/api/admin/save-product", { method: "POST", body: fd });
+        clearProductForm();
+        tg.showAlert("✅ Товар сохранён! Перезагрузите страницу для обновления каталога.");
+    }
+
+    /* ─── BALANCE ─── */
+    async function adjustBalance() {
+        const fd = new FormData();
+        fd.append("user_id", document.getElementById("adm-user-id").value);
+        fd.append("amount", document.getElementById("adm-amount").value);
+        const r = await fetch("/api/admin/change-balance", { method: "POST", body: fd });
+        if (r.ok) {
+            tg.showAlert("✅ Баланс обновлён!");
+            document.getElementById("adm-user-id").value = "";
+            document.getElementById("adm-amount").value = "";
+        }
+    }
+
+    /* ─── BUY ─── */
+    async function triggerPayment(prodId, type) {
+        if (type === "yoomoney") {
+            window.open("https://yoomoney.ru/fundraise/1HSLJ8JGS6P.260520", "_blank");
+            tg.showPopup({
+                title: "💳 Оплата ЮMoney",
+                message: "Переведите сумму. После перевода нажмите «Я оплатил» — заявка уйдёт администратору.",
+                buttons: [{ id: "paid", type: "default", text: "✅ Я оплатил" }, { type: "cancel", text: "Отмена" }]
+            }, btn => { if (btn === "paid") doPurchase(prodId, "yoomoney"); });
+        } else {
+            doPurchase(prodId, type);
+        }
+    }
+
+    async function doPurchase(prodId, type) {
+        const res = await fetch("/api/buy", {
+            method: "POST", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ user_id: user.id, username: user.username, product_id: prodId, type })
+        });
+        const d = await res.json();
+        if (d.error) tg.showAlert("Ошибка: " + d.error);
+        else if (d.status === "invoice_sent") tg.close();
+        else tg.showAlert("✅ Заявка отправлена! Проверьте статус в Профиле или в диалоге с ботом.");
+    }
+
+    function esc(t) {
+        return (t||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+    }
+</script>
 </body>
 </html>
