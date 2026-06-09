@@ -1,1158 +1,1220 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Shop Pro 3.0</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <style>
-        /* ═══════════════════════════════════════
-           BASE DARK THEME (default)
-        ═══════════════════════════════════════ */
-        :root {
-            --bg:        #0b0918;
-            --bg2:       #120f22;
-            --surface:   #1a1630;
-            --card:      #1e1a35;
-            --card2:     #252040;
-            --border:    rgba(255,255,255,0.07);
-            --border2:   rgba(255,255,255,0.12);
-            --text:      #f0eeff;
-            --text2:     #c8c5e0;
-            --muted:     #7b7399;
-            --muted2:    #4e4869;
-            /* Accent — overridden by .accent-* classes */
-            --accent:    #7c3aed;
-            --accent2:   #9d5cf6;
-            --accent3:   #c084fc;
-            --glow:      rgba(124,58,237,0.35);
-            --glow2:     rgba(124,58,237,0.15);
-            /* Status colors — fixed, never themed */
-            --s-green:   #4ade80;
-            --s-amber:   #fbbf24;
-            --s-red:     #f87171;
-            --s-cyan:    #22d3ee;
-            --s-green-d: rgba(74,222,128,0.12);
-            --s-amber-d: rgba(251,191,36,0.12);
-            --s-red-d:   rgba(248,113,113,0.12);
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Shop Pro 3.0</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+/* ═══════════════════════════════════════════
+   CSS VARIABLES — DARK (default)
+═══════════════════════════════════════════ */
+:root {
+  --bg:      #090714;
+  --bg2:     #0f0c1f;
+  --surface: #141129;
+  --card:    #1a1632;
+  --card2:   #221e3e;
+  --border:  rgba(255,255,255,0.06);
+  --border2: rgba(255,255,255,0.11);
+  --text:    #ede9ff;
+  --text2:   #c5bfe8;
+  --muted:   #7067a0;
+  --muted2:  #433d68;
+  /* accent — overridden by .accent-* */
+  --accent:  #7c3aed;
+  --accent2: #9d5cf6;
+  --accent3: #c084fc;
+  --glow:    rgba(124,58,237,.38);
+  --glow2:   rgba(124,58,237,.16);
+  /* fixed status colors */
+  --ok:  #4ade80; --ok-d:  rgba(74,222,128,.12);
+  --wrn: #fbbf24; --wrn-d: rgba(251,191,36,.12);
+  --err: #f87171; --err-d: rgba(248,113,113,.12);
+}
+/* LIGHT */
+body.theme-light {
+  --bg:      #f0eff8;
+  --bg2:     #ffffff;
+  --surface: #ffffff;
+  --card:    #ffffff;
+  --card2:   #e8e6f4;
+  --border:  rgba(0,0,0,0.07);
+  --border2: rgba(0,0,0,0.13);
+  --text:    #1a1630;
+  --text2:   #3a3558;
+  --muted:   #6b6490;
+  --muted2:  #a9a4c2;
+}
+/* ACCENT: RED */
+body.accent-red   { --accent:#b91c1c; --accent2:#ef4444; --accent3:#fca5a5; --glow:rgba(185,28,28,.34); --glow2:rgba(185,28,28,.14); }
+/* ACCENT: GREEN */
+body.accent-green { --accent:#15803d; --accent2:#22c55e; --accent3:#86efac; --glow:rgba(21,128,61,.34);  --glow2:rgba(21,128,61,.14);  }
+/* ACCENT: ORANGE */
+body.accent-orange{ --accent:#c2410c; --accent2:#f97316; --accent3:#fdba74; --glow:rgba(194,65,12,.34); --glow2:rgba(194,65,12,.14); }
+/* ACCENT: BLUE */
+body.accent-blue  { --accent:#1d4ed8; --accent2:#3b82f6; --accent3:#93c5fd; --glow:rgba(29,78,216,.34);  --glow2:rgba(29,78,216,.14);  }
+/* ACCENT: YELLOW */
+body.accent-yellow{ --accent:#a16207; --accent2:#eab308; --accent3:#fde047; --glow:rgba(161,98,7,.34);   --glow2:rgba(161,98,7,.14);   }
+/* ACCENT: PINK */
+body.accent-pink  { --accent:#9d174d; --accent2:#ec4899; --accent3:#f9a8d4; --glow:rgba(157,23,77,.34);  --glow2:rgba(157,23,77,.14);  }
+/* ACCENT: CYAN */
+body.accent-cyan  { --accent:#0e7490; --accent2:#06b6d4; --accent3:#67e8f9; --glow:rgba(14,116,144,.34); --glow2:rgba(14,116,144,.14); }
 
-        /* ─── Light theme ─── */
-        body.theme-light {
-            --bg:      #f2f2f7;
-            --bg2:     #ffffff;
-            --surface: #ffffff;
-            --card:    #ffffff;
-            --card2:   #e8e8f0;
-            --border:  rgba(0,0,0,0.07);
-            --border2: rgba(0,0,0,0.13);
-            --text:    #1c1c1e;
-            --text2:   #3a3a3c;
-            --muted:   #6b6b7a;
-            --muted2:  #aeaeb8;
-        }
+/* ═══ RESET ═══ */
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+::-webkit-scrollbar{width:0}
 
-        /* ─── Accent: Red ─── */
-        body.accent-red {
-            --accent:  #dc2626;
-            --accent2: #ef4444;
-            --accent3: #f87171;
-            --glow:    rgba(220,38,38,0.32);
-            --glow2:   rgba(220,38,38,0.14);
-        }
+body {
+  font-family: -apple-system,'SF Pro Display',system-ui,sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height:100vh;
+  overflow-x:hidden;
+  transition: background .3s, color .3s;
+}
 
-        /* ─── Accent: Green ─── */
-        body.accent-green {
-            --accent:  #16a34a;
-            --accent2: #22c55e;
-            --accent3: #4ade80;
-            --glow:    rgba(22,163,74,0.32);
-            --glow2:   rgba(22,163,74,0.14);
-        }
+/* ═══════════════ STAR CANVAS ═══════════════ */
+#star-canvas {
+  position: fixed; top:0; left:0; width:100%; height:100%;
+  pointer-events:none; z-index:0;
+  opacity: 1; transition: opacity .5s;
+}
+body.theme-light #star-canvas { opacity: 0; }
 
-        /* ─── Accent: Orange ─── */
-        body.accent-orange {
-            --accent:  #c2410c;
-            --accent2: #ea580c;
-            --accent3: #fb923c;
-            --glow:    rgba(194,65,12,0.32);
-            --glow2:   rgba(194,65,12,0.14);
-        }
+/* ═══════════════ TAB BAR ═══════════════ */
+.tab-bar {
+  position:fixed; bottom:0; left:0; right:0; height:62px;
+  background: var(--surface);
+  border-top: 1px solid var(--border2);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  display:flex; z-index:200;
+  padding-bottom: env(safe-area-inset-bottom);
+  transition: background .3s, border-color .3s;
+}
+.tab-item {
+  flex:1; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:2px;
+  background:none; border:none; cursor:pointer;
+  color:var(--muted2); font-size:10px; font-weight:700;
+  letter-spacing:.3px; transition:color .2s; position:relative;
+}
+.tab-icon { font-size:22px; transition: transform .2s; }
+.tab-item.active { color:var(--accent2); }
+.tab-item.active .tab-icon { transform:scale(1.1); }
+.tab-notch {
+  position:absolute; top:-1px; left:50%; transform:translateX(-50%);
+  width:38px; height:2.5px; border-radius:0 0 4px 4px;
+  background:var(--accent2); opacity:0; transition: opacity .2s, background .3s;
+}
+.tab-item.active .tab-notch { opacity:1; }
+.tab-badge {
+  position:absolute; top:6px; right:calc(50% - 22px);
+  background:var(--err); color:#fff; border-radius:10px;
+  font-size:9px; font-weight:900; padding:2px 5px;
+  border:2px solid var(--bg); min-width:16px; text-align:center;
+  transition: border-color .3s;
+}
 
-        /* ─── Accent: Purple (default — no overrides needed) ─── */
+/* ═══════════════ PAGES ═══════════════ */
+.page { display:none; padding:0 0 74px; min-height:100vh; position:relative; z-index:1; }
+.page.active { display:block; }
 
-        /* ══════════════════════════════════════ */
+/* ═══════════════ PAGE HEADER ═══════════════ */
+.page-top { padding:20px 16px 10px; }
+.page-eyebrow {
+  font-size:11px; font-weight:700; color:var(--muted);
+  text-transform:uppercase; letter-spacing:1.2px; margin-bottom:4px;
+  transition: color .3s;
+}
+.page-title { font-size:28px; font-weight:900; letter-spacing:-.5px; }
+.page-title .accent { color:var(--accent2); transition: color .3s; }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+/* ═══════════════ iOS SECTIONS ═══════════════ */
+.section { margin:0 16px 12px; }
+.sec-label {
+  font-size:12px; font-weight:700; color:var(--muted);
+  text-transform:uppercase; letter-spacing:.8px;
+  padding:0 4px 6px; transition: color .3s;
+}
+.sec-body {
+  background:var(--card); border-radius:18px;
+  border:1px solid var(--border); overflow:hidden;
+  transition: background .3s, border-color .3s;
+}
+.cell {
+  display:flex; align-items:center; padding:14px 16px; gap:12px;
+  border-bottom:1px solid var(--border); transition: background .15s, border-color .3s;
+}
+.cell:last-child { border-bottom:none; }
+.cell.tappable { cursor:pointer; }
+.cell.tappable:active { background:var(--card2); }
+.cell-icon {
+  width:36px; height:36px; border-radius:10px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center; font-size:17px;
+}
+.cell-body { flex:1; min-width:0; }
+.cell-title { font-size:15px; font-weight:600; }
+.cell-sub { font-size:12px; color:var(--muted); margin-top:1px; transition: color .3s; }
+.cell-right { color:var(--muted2); font-size:13px; flex-shrink:0; display:flex; align-items:center; gap:4px; }
+.check { color:var(--accent2); font-size:18px; font-weight:900; transition: color .3s; }
 
-        body {
-            font-family: -apple-system, 'SF Pro Display', system-ui, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            min-height: 100vh;
-            overflow-x: hidden;
-            transition: background .25s, color .25s;
-        }
+/* ═══════════════ PRODUCT CARD ═══════════════ */
+.prod-card {
+  margin:0 16px 14px;
+  background:var(--card); border-radius:22px;
+  border:1px solid var(--border); overflow:hidden; position:relative;
+  transition: background .3s, border-color .3s;
+}
+.prod-shimmer {
+  position:absolute; top:0; left:0; right:0; height:1.5px;
+  background:linear-gradient(90deg,transparent,var(--accent2),transparent);
+  opacity:.6; transition: background .3s;
+}
+.prod-img  { width:100%; height:200px; object-fit:cover; display:block; }
+.prod-video{ width:100%; max-height:260px; display:block; background:#000; }
+.prod-body { padding:15px; }
+.prod-name { font-size:19px; font-weight:900; letter-spacing:-.3px; }
+.prod-desc { font-size:13px; color:var(--muted); line-height:1.6; margin:6px 0 14px; transition: color .3s; }
+.prod-btns2  { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.prod-btn-full { margin-top:8px; }
 
-        ::-webkit-scrollbar { width: 0; }
+/* ═══════════════ BUTTONS ═══════════════ */
+.btn {
+  width:100%; padding:14px; border:none; border-radius:14px;
+  font-size:14px; font-weight:800; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; gap:7px;
+  transition: opacity .15s, transform .1s; letter-spacing:.1px;
+}
+.btn:active { opacity:.75; transform:scale(.97); }
+/* Accent button — follows theme */
+.btn-accent {
+  background:linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+  color:#fff; box-shadow:0 5px 20px var(--glow);
+  transition: background .3s, box-shadow .3s;
+}
+/* Payment buttons — fixed gradients */
+.btn-stars   { background:linear-gradient(135deg,#d97706,#92400e); color:#fff; box-shadow:0 4px 14px rgba(217,119,6,.28); }
+.btn-yoo     { background:linear-gradient(135deg,#7c3aed,#4c1d95); color:#fff; box-shadow:0 4px 14px rgba(124,58,237,.28); }
+.btn-pay-bal { background:linear-gradient(135deg,#2563eb,#1e3a8a); color:#fff; box-shadow:0 4px 14px rgba(37,99,235,.25); }
+.btn-ghost   { background:var(--card2); color:var(--muted); border:1px solid var(--border2); transition: background .3s, border-color .3s, color .3s; }
+.btn-danger  { background:linear-gradient(135deg,#b91c1c,#7f1d1d); color:#fff; box-shadow:0 4px 14px rgba(185,28,28,.3); }
 
-        /* ══════════════ TAB BAR ══════════════ */
-        .tab-bar {
-            position: fixed; bottom: 0; left: 0; right: 0;
-            height: 60px;
-            background: var(--surface);
-            border-top: 1px solid var(--border2);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            display: flex;
-            z-index: 200;
-            padding-bottom: env(safe-area-inset-bottom);
-            transition: background .25s, border-color .25s;
-        }
-        .tab-item {
-            flex: 1; display: flex; flex-direction: column;
-            align-items: center; justify-content: center; gap: 3px;
-            background: none; border: none; cursor: pointer;
-            color: var(--muted2); font-size: 10px; font-weight: 600;
-            letter-spacing: .3px; transition: color .2s; position: relative;
-        }
-        .tab-icon { font-size: 22px; transition: transform .2s; }
-        .tab-item.active { color: var(--accent2); }
-        .tab-item.active .tab-icon { transform: scale(1.12); }
-        .tab-notch {
-            position: absolute; top: -1px; left: 50%; transform: translateX(-50%);
-            width: 36px; height: 2px; border-radius: 0 0 3px 3px;
-            background: var(--accent2); opacity: 0; transition: opacity .2s, background .25s;
-        }
-        .tab-item.active .tab-notch { opacity: 1; }
-        .tab-badge {
-            position: absolute; top: 7px; right: calc(50% - 20px);
-            background: var(--s-red); color: #fff; border-radius: 10px;
-            font-size: 9px; font-weight: 800; padding: 2px 5px;
-            min-width: 16px; text-align: center; border: 2px solid var(--bg);
-        }
+/* ═══════════════ PROFILE ═══════════════ */
+.subpage { display:none; }
+.subpage.active { display:block; }
 
-        /* ══════════════ PAGES ══════════════ */
-        .page { display: none; padding: 0 0 72px; min-height: 100vh; }
-        .page.active { display: block; }
+.profile-hero {
+  margin:0 16px 12px;
+  border-radius:22px;
+  border:1px solid var(--border);
+  padding:28px 20px;
+  text-align:center; position:relative; overflow:hidden;
+  /* gradient changes with accent */
+  background: radial-gradient(ellipse 80% 60% at 50% 0%, var(--glow) 0%, transparent 70%),
+              var(--card);
+  transition: background .3s, border-color .3s;
+}
+.profile-ava {
+  width:72px; height:72px; border-radius:50%;
+  background:linear-gradient(135deg, var(--accent), var(--accent2));
+  display:flex; align-items:center; justify-content:center;
+  font-size:30px; margin:0 auto 14px; position:relative;
+  box-shadow: 0 0 0 4px var(--glow2), 0 0 26px var(--glow);
+  transition: background .3s, box-shadow .3s;
+}
+.profile-name { font-size:18px; font-weight:900; }
+.profile-uid  { font-size:12px; color:var(--muted); margin-top:3px; transition: color .3s; }
+.balance-row  { display:flex; align-items:baseline; justify-content:center; gap:6px; margin-top:18px; }
+.balance-val  { font-size:46px; font-weight:900; letter-spacing:-2px; color:var(--accent3); transition: color .3s; }
+.balance-cur  { font-size:22px; font-weight:700; color:var(--muted); transition: color .3s; }
 
-        /* ══════════════ PAGE HEADER ══════════════ */
-        .page-top {
-            padding: 18px 16px 10px;
-            background: linear-gradient(180deg, var(--bg2) 60%, transparent 100%);
-            transition: background .25s;
-        }
-        .page-eyebrow {
-            font-size: 11px; font-weight: 700; color: var(--muted);
-            text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 4px;
-            transition: color .25s;
-        }
-        .page-title { font-size: 26px; font-weight: 800; letter-spacing: -.4px; }
-        .page-title .accent { color: var(--accent2); transition: color .25s; }
+/* ═══════════════ ORDERS ═══════════════ */
+.order-row {
+  display:flex; align-items:center; gap:12px;
+  padding:13px 16px; border-bottom:1px solid var(--border);
+  transition: border-color .3s;
+}
+.order-row:last-child { border-bottom:none; }
+.order-icon { width:40px; height:40px; border-radius:12px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:18px; }
+.order-info { flex:1; min-width:0; }
+.order-name { font-size:14px; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.order-meta { font-size:12px; color:var(--muted); margin-top:2px; transition: color .3s; }
 
-        /* ══════════════ iOS SECTIONS ══════════════ */
-        .section { margin: 0 16px 10px; }
-        .sec-label {
-            font-size: 12px; font-weight: 700; color: var(--muted);
-            text-transform: uppercase; letter-spacing: .8px;
-            padding: 0 4px 6px; transition: color .25s;
-        }
-        .sec-body {
-            background: var(--card);
-            border-radius: 16px;
-            border: 1px solid var(--border);
-            overflow: hidden;
-            transition: background .25s, border-color .25s;
-        }
-        .cell {
-            display: flex; align-items: center;
-            padding: 13px 16px; gap: 12px;
-            border-bottom: 1px solid var(--border);
-            transition: background .15s, border-color .25s;
-        }
-        .cell:last-child { border-bottom: none; }
-        .cell.tappable { cursor: pointer; }
-        .cell.tappable:active { background: var(--card2); }
-        .cell-icon {
-            width: 36px; height: 36px; border-radius: 10px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 17px; flex-shrink: 0;
-        }
-        .cell-body { flex: 1; min-width: 0; }
-        .cell-title { font-size: 15px; font-weight: 600; }
-        .cell-sub { font-size: 12px; color: var(--muted); margin-top: 1px; transition: color .25s; }
-        .cell-right { color: var(--muted2); font-size: 13px; font-weight: 500; flex-shrink: 0; display: flex; align-items: center; gap: 4px; }
-        .chevron { color: var(--muted2); font-size: 13px; }
-        .check { color: var(--accent2); font-size: 18px; font-weight: 900; transition: color .25s; }
+/* ═══════════════ BADGES ═══════════════ */
+.badge { display:inline-flex; align-items:center; padding:3px 9px; border-radius:20px; font-size:11px; font-weight:800; flex-shrink:0; }
+.badge-paid     { background:var(--ok-d);  color:var(--ok);  }
+.badge-pending  { background:var(--wrn-d); color:var(--wrn); }
+.badge-declined { background:var(--err-d); color:var(--err); }
 
-        /* ══════════════ SPACER ══════════════ */
-        .sp { height: 12px; }
-        .sp8 { height: 8px; }
+/* ═══════════════ SUBPAGE HEADER ═══════════════ */
+.subpage-hdr { display:flex; align-items:center; gap:10px; padding:14px 16px 8px; }
+.back-btn {
+  width:34px; height:34px; border-radius:10px; flex-shrink:0;
+  background:var(--card2); border:1px solid var(--border2);
+  color:var(--text); font-size:20px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  font-weight:300; transition: background .3s, border-color .3s, color .3s;
+}
+.subpage-title { font-size:20px; font-weight:900; }
 
-        /* ══════════════ PRODUCT CARD ══════════════ */
-        .prod-card {
-            margin: 0 16px 12px;
-            background: var(--card);
-            border-radius: 20px;
-            border: 1px solid var(--border);
-            overflow: hidden;
-            position: relative;
-            transition: background .25s, border-color .25s;
-        }
-        .prod-shimmer {
-            position: absolute; top: 0; left: 0; right: 0; height: 1px;
-            background: linear-gradient(90deg, transparent, var(--accent2), transparent);
-            opacity: .55; transition: background .25s;
-        }
-        .prod-img { width: 100%; height: 190px; object-fit: cover; display: block; }
-        .prod-video { width: 100%; max-height: 260px; display: block; background: #000; }
-        .prod-body { padding: 15px; }
-        .prod-name { font-size: 18px; font-weight: 800; letter-spacing: -.2px; }
-        .prod-desc { font-size: 13px; color: var(--muted); line-height: 1.55; margin: 6px 0 14px; transition: color .25s; }
-        .prod-btns2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .prod-btn-full { margin-top: 8px; }
+/* ═══════════════ ADMIN TILES ═══════════════ */
+.adm-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:0 16px 12px; }
+.adm-tile {
+  background:var(--card); border-radius:18px; border:1px solid var(--border);
+  padding:18px 15px; cursor:pointer;
+  display:flex; flex-direction:column; gap:10px;
+  position:relative; overflow:hidden;
+  transition: border-color .2s, transform .1s, background .3s;
+}
+.adm-tile:active { transform:scale(.96); }
+.adm-tile::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:1.5px;
+  background:var(--tile-top, var(--accent2)); transition: background .3s;
+}
+.adm-tile-ico  { font-size:28px; }
+.adm-tile-name { font-size:14px; font-weight:900; }
+.adm-tile-sub  { font-size:11px; color:var(--muted); transition: color .3s; }
+.tile-purple { --tile-top:#9d5cf6; }
+.tile-cyan   { --tile-top:#22d3ee; }
+.tile-amber  { --tile-top:#fbbf24; }
+.tile-red    { --tile-top:#f87171; }
 
-        /* ══════════════ BUTTONS — fixed gradients, never themed ══════════════ */
-        .btn {
-            width: 100%; padding: 14px; border: none; border-radius: 14px;
-            font-size: 14px; font-weight: 700; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; gap: 7px;
-            transition: opacity .15s, transform .1s; letter-spacing: .1px;
-        }
-        .btn:active { opacity: .75; transform: scale(.98); }
-        /* Accent button — uses theme accent, but this is UI chrome not a product button */
-        .btn-accent {
-            background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
-            color: #fff; box-shadow: 0 5px 18px var(--glow);
-            transition: box-shadow .25s;
-        }
-        /* Payment buttons — hardcoded, never change with theme */
-        .btn-stars {
-            background: linear-gradient(135deg, #d97706, #92400e);
-            color: #fff; box-shadow: 0 4px 14px rgba(217,119,6,.3);
-        }
-        .btn-yoo {
-            background: linear-gradient(135deg, #7c3aed, #5b21b6);
-            color: #fff; box-shadow: 0 4px 14px rgba(124,58,237,.3);
-        }
-        .btn-pay-bal {
-            background: linear-gradient(135deg, #2563eb, #1d4ed8);
-            color: #fff; box-shadow: 0 4px 14px rgba(37,99,235,.25);
-        }
-        .btn-ghost {
-            background: var(--card2); color: var(--muted);
-            border: 1px solid var(--border2);
-            transition: background .25s, border-color .25s, color .25s;
-        }
-        .btn-edit {
-            background: transparent; color: var(--accent3);
-            border: 1px solid rgba(var(--accent),0.3); width: 100%;
-            transition: color .25s;
-        }
+/* ═══════════════ FORM ═══════════════ */
+.form-sec  { margin:0 16px 10px; }
+.form-lbl  { font-size:12px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.8px; padding:0 4px 6px; display:block; transition: color .3s; }
+.form-body { background:var(--card); border-radius:16px; border:1px solid var(--border); overflow:hidden; transition: background .3s, border-color .3s; }
+.form-field { display:flex; flex-direction:column; padding:11px 14px; border-bottom:1px solid var(--border); transition: border-color .3s; }
+.form-field:last-child { border-bottom:none; }
+.field-lbl { font-size:11px; color:var(--muted); margin-bottom:4px; transition: color .3s; }
+input,textarea { background:transparent; border:none; outline:none; color:var(--text); font-size:15px; font-family:inherit; width:100%; transition: color .3s; }
+textarea { resize:none; }
+input::placeholder,textarea::placeholder { color:var(--muted2); }
+.form-2col { display:grid; grid-template-columns:1fr 1fr; }
+.form-2col .form-field { border-bottom:1px solid var(--border); }
+.form-2col .form-field:first-child { border-right:1px solid var(--border); border-bottom:1px solid var(--border); }
+.form-actions { padding:0 16px; display:flex; flex-direction:column; gap:8px; }
 
-        /* ══════════════ PROFILE HERO ══════════════ */
-        .profile-hero {
-            margin: 0 16px 10px;
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 22px; padding: 24px; text-align: center;
-            position: relative; overflow: hidden;
-            transition: background .25s, border-color .25s;
-        }
-        .profile-hero::before {
-            content: ''; position: absolute; inset: 0;
-            background: radial-gradient(ellipse at 50% 0%, var(--glow2) 0%, transparent 70%);
-            transition: background .25s;
-        }
-        .profile-ava {
-            width: 68px; height: 68px; border-radius: 50%;
-            background: linear-gradient(135deg, var(--accent), var(--accent2));
-            display: flex; align-items: center; justify-content: center;
-            font-size: 28px; margin: 0 auto 12px; position: relative;
-            box-shadow: 0 0 0 3px var(--glow2), 0 0 22px var(--glow);
-            transition: background .25s, box-shadow .25s;
-        }
-        .profile-name { font-size: 17px; font-weight: 800; position: relative; }
-        .profile-id { font-size: 12px; color: var(--muted); margin-top: 3px; position: relative; transition: color .25s; }
-        .balance-row {
-            display: flex; align-items: baseline; justify-content: center;
-            gap: 6px; margin-top: 16px; position: relative;
-        }
-        .balance-val {
-            font-size: 42px; font-weight: 900; letter-spacing: -1.5px;
-            color: var(--accent3); transition: color .25s;
-        }
-        .balance-cur { font-size: 22px; font-weight: 700; color: var(--muted); transition: color .25s; }
+/* ═══════════════ AUDIT ═══════════════ */
+.tx-row  { padding:13px 16px; border-bottom:1px solid var(--border); transition: border-color .3s; }
+.tx-row:last-child { border-bottom:none; }
+.tx-top  { display:flex; justify-content:space-between; align-items:flex-start; gap:8px; }
+.tx-name { font-size:14px; font-weight:700; flex:1; }
+.tx-meta { font-size:12px; color:var(--muted); margin-top:4px; transition: color .3s; }
+.tx-id   { font-size:10px; color:var(--muted2); font-family:monospace; margin-top:3px; transition: color .3s; }
+.user-row { display:flex; align-items:center; justify-content:space-between; padding:13px 16px; border-bottom:1px solid var(--border); transition: border-color .3s; }
+.user-row:last-child { border-bottom:none; }
+.u-name { font-size:14px; font-weight:700; }
+.u-id   { font-size:11px; color:var(--muted); margin-top:2px; transition: color .3s; }
+.u-bal  { font-size:16px; font-weight:900; color:var(--accent3); transition: color .3s; }
 
-        /* ══════════════ ORDER ROWS ══════════════ */
-        .order-row {
-            display: flex; align-items: center; gap: 12px;
-            padding: 13px 16px; border-bottom: 1px solid var(--border);
-        }
-        .order-row:last-child { border-bottom: none; }
-        .order-icon {
-            width: 40px; height: 40px; border-radius: 12px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 18px; flex-shrink: 0;
-        }
-        .order-info { flex: 1; min-width: 0; }
-        .order-name { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .order-meta { font-size: 12px; color: var(--muted); margin-top: 2px; transition: color .25s; }
+/* ═══════════════ DIALOGS ═══════════════ */
+.dialog-row {
+  display:flex; align-items:center; gap:12px; padding:13px 16px;
+  border-bottom:1px solid var(--border); cursor:pointer;
+  transition: background .15s, border-color .3s;
+}
+.dialog-row:last-child { border-bottom:none; }
+.dialog-row:active { background:var(--card2); }
+.d-ava {
+  width:46px; height:46px; border-radius:50%; flex-shrink:0;
+  background:linear-gradient(135deg, var(--accent), var(--accent2));
+  display:flex; align-items:center; justify-content:center; font-size:20px;
+  box-shadow:0 2px 12px var(--glow2); transition: background .3s, box-shadow .3s;
+}
+.d-info { flex:1; min-width:0; }
+.d-name { font-size:15px; font-weight:700; }
+.d-last { font-size:12px; color:var(--muted); margin-top:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; transition: color .3s; }
+.d-badge { width:20px; height:20px; border-radius:50%; flex-shrink:0; background:var(--accent2); color:#fff; font-size:10px; font-weight:900; display:flex; align-items:center; justify-content:center; transition: background .3s; }
+.d-time  { font-size:11px; color:var(--muted2); transition: color .3s; }
 
-        /* ══════════════ BADGES ══════════════ */
-        .badge {
-            display: inline-flex; align-items: center;
-            padding: 3px 9px; border-radius: 20px;
-            font-size: 11px; font-weight: 700; flex-shrink: 0;
-        }
-        .badge-paid     { background: var(--s-green-d); color: var(--s-green); }
-        .badge-pending  { background: var(--s-amber-d); color: var(--s-amber); }
-        .badge-declined { background: var(--s-red-d);   color: var(--s-red); }
+/* ═══════════════ CHAT ═══════════════ */
+.chat-msgs { display:flex; flex-direction:column; gap:6px; padding:12px 16px 100px; }
+.msg-wrap  { display:flex; flex-direction:column; }
+.msg-wrap.out { align-items:flex-end; }
+.msg-bub { max-width:78%; padding:10px 14px; font-size:14px; line-height:1.5; border-radius:18px; }
+.msg-in  { background:var(--card2); border:1px solid var(--border2); border-bottom-left-radius:4px; transition: background .3s, border-color .3s; }
+.msg-out { background:linear-gradient(135deg, var(--accent), var(--accent2)); color:#fff; border-bottom-right-radius:4px; box-shadow:0 3px 12px var(--glow); transition: background .3s, box-shadow .3s; }
+.msg-time{ font-size:10px; color:var(--muted2); margin-top:3px; padding:0 2px; transition: color .3s; }
+.chat-input-bar {
+  position:fixed; bottom:62px; left:0; right:0; padding:10px 12px;
+  background:var(--surface); backdrop-filter:blur(20px);
+  border-top:1px solid var(--border);
+  display:flex; gap:8px; align-items:center;
+  transition: background .3s, border-color .3s;
+}
+.chat-inp {
+  flex:1; background:var(--card2); border:1px solid var(--border2);
+  border-radius:22px; padding:10px 16px;
+  color:var(--text); font-size:14px; outline:none; font-family:inherit;
+  transition: background .3s, border-color .3s, color .3s;
+}
+.chat-send {
+  width:40px; height:40px; border-radius:50%; flex-shrink:0;
+  background:linear-gradient(135deg, var(--accent), var(--accent2));
+  border:none; cursor:pointer; color:#fff; font-size:17px;
+  display:flex; align-items:center; justify-content:center;
+  box-shadow:0 3px 12px var(--glow); transition: background .3s, box-shadow .3s;
+}
 
-        /* ══════════════ ADMIN HOME GRID ══════════════ */
-        .adm-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 0 16px 10px; }
-        .adm-tile {
-            background: var(--card);
-            border-radius: 18px; border: 1px solid var(--border);
-            padding: 18px 15px; cursor: pointer;
-            transition: border-color .2s, transform .1s, background .25s;
-            display: flex; flex-direction: column; gap: 10px;
-            position: relative; overflow: hidden;
-        }
-        .adm-tile:active { transform: scale(.97); }
-        .adm-tile::before {
-            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
-            background: var(--tile-top, var(--accent2));
-            transition: background .25s;
-        }
-        .adm-tile-ico { font-size: 28px; }
-        .adm-tile-name { font-size: 14px; font-weight: 800; }
-        .adm-tile-sub { font-size: 11px; color: var(--muted); transition: color .25s; }
+/* ═══════════════ SETTINGS ═══════════════ */
+.theme-row {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:13px 16px; border-bottom:1px solid var(--border);
+  cursor:pointer; transition: background .15s, border-color .3s;
+}
+.theme-row:last-child { border-bottom:none; }
+.theme-row:active { background:var(--card2); }
+.theme-row-left { display:flex; align-items:center; gap:12px; }
+.theme-row-icon { width:34px; height:34px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:17px; }
+.theme-row-name { font-size:15px; font-weight:600; }
 
-        /* tile color variants */
-        .tile-purple { --tile-top: #9d5cf6; }
-        .tile-cyan   { --tile-top: #22d3ee; }
-        .tile-amber  { --tile-top: #fbbf24; }
-        .tile-red    { --tile-top: #f87171; }
+.color-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; padding:14px 12px; }
+.color-swatch { display:flex; flex-direction:column; align-items:center; gap:7px; cursor:pointer; }
+.swatch-circle { width:46px; height:46px; border-radius:50%; border:3px solid transparent; transition: border-color .2s, transform .15s; }
+.swatch-circle:active { transform:scale(.9); }
+.color-swatch.selected .swatch-circle { border-color:var(--text); transform:scale(1.08); }
+.swatch-label { font-size:10px; color:var(--muted); font-weight:700; letter-spacing:.3px; transition: color .3s; }
+.color-swatch.selected .swatch-label { color:var(--text); }
 
-        /* ══════════════ SUBPAGES ══════════════ */
-        .subpage { display: none; }
-        .subpage.active { display: block; }
-        .subpage-hdr {
-            display: flex; align-items: center; gap: 10px;
-            padding: 14px 16px 8px;
-        }
-        .back-btn {
-            width: 34px; height: 34px; border-radius: 10px;
-            background: var(--card2); border: 1px solid var(--border2);
-            color: var(--text); font-size: 18px; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            font-weight: 300; flex-shrink: 0;
-            transition: background .25s, border-color .25s, color .25s;
-        }
-        .subpage-title { font-size: 19px; font-weight: 800; }
-
-        /* ══════════════ FORM (iOS-style inset) ══════════════ */
-        .form-sec { margin: 0 16px 10px; }
-        .form-lbl {
-            font-size: 11px; font-weight: 700; color: var(--muted);
-            text-transform: uppercase; letter-spacing: .8px;
-            padding: 0 4px 5px; display: block; transition: color .25s;
-        }
-        .form-body {
-            background: var(--card); border-radius: 16px;
-            border: 1px solid var(--border); overflow: hidden;
-            transition: background .25s, border-color .25s;
-        }
-        .form-field {
-            display: flex; flex-direction: column;
-            padding: 11px 14px; border-bottom: 1px solid var(--border);
-            transition: border-color .25s;
-        }
-        .form-field:last-child { border-bottom: none; }
-        .field-lbl { font-size: 11px; color: var(--muted); margin-bottom: 4px; transition: color .25s; }
-        input, textarea {
-            background: transparent; border: none; outline: none;
-            color: var(--text); font-size: 15px; font-family: inherit; width: 100%;
-            transition: color .25s;
-        }
-        textarea { resize: none; }
-        input::placeholder, textarea::placeholder { color: var(--muted2); }
-        .form-2col { display: grid; grid-template-columns: 1fr 1fr; }
-        .form-2col .form-field { border-bottom: 1px solid var(--border); }
-        .form-2col .form-field:first-child { border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); }
-        .form-actions { padding: 0 16px; display: flex; flex-direction: column; gap: 8px; }
-
-        /* ══════════════ AUDIT ROWS ══════════════ */
-        .tx-row {
-            padding: 13px 16px; border-bottom: 1px solid var(--border);
-        }
-        .tx-row:last-child { border-bottom: none; }
-        .tx-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
-        .tx-name { font-size: 14px; font-weight: 700; flex: 1; }
-        .tx-meta { font-size: 12px; color: var(--muted); margin-top: 4px; transition: color .25s; }
-        .tx-id { font-size: 10px; color: var(--muted2); font-family: monospace; margin-top: 3px; transition: color .25s; }
-        .user-row {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 13px 16px; border-bottom: 1px solid var(--border);
-        }
-        .user-row:last-child { border-bottom: none; }
-        .u-name { font-size: 14px; font-weight: 700; }
-        .u-id { font-size: 11px; color: var(--muted); margin-top: 2px; transition: color .25s; }
-        .u-bal { font-size: 16px; font-weight: 900; color: var(--accent3); transition: color .25s; }
-
-        /* ══════════════ DIALOGS ══════════════ */
-        .dialog-row {
-            display: flex; align-items: center; gap: 12px;
-            padding: 13px 16px; border-bottom: 1px solid var(--border);
-            cursor: pointer; transition: background .15s;
-        }
-        .dialog-row:last-child { border-bottom: none; }
-        .dialog-row:active { background: var(--card2); }
-        .d-ava {
-            width: 46px; height: 46px; border-radius: 50%; flex-shrink: 0;
-            background: linear-gradient(135deg, var(--accent), var(--accent2));
-            display: flex; align-items: center; justify-content: center;
-            font-size: 20px; box-shadow: 0 2px 10px var(--glow2);
-            transition: background .25s, box-shadow .25s;
-        }
-        .d-info { flex: 1; min-width: 0; }
-        .d-name { font-size: 15px; font-weight: 700; }
-        .d-last { font-size: 12px; color: var(--muted); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: color .25s; }
-        .d-badge {
-            width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0;
-            background: var(--accent2); color: #fff; font-size: 10px; font-weight: 800;
-            display: flex; align-items: center; justify-content: center;
-            transition: background .25s;
-        }
-        .d-time { font-size: 11px; color: var(--muted2); transition: color .25s; }
-
-        /* ══════════════ CHAT ══════════════ */
-        .chat-msgs {
-            display: flex; flex-direction: column; gap: 6px;
-            padding: 12px 16px 90px;
-        }
-        .msg-wrap { display: flex; flex-direction: column; }
-        .msg-wrap.out { align-items: flex-end; }
-        .msg-bub {
-            max-width: 78%; padding: 10px 14px;
-            font-size: 14px; line-height: 1.5; border-radius: 18px;
-        }
-        .msg-in {
-            background: var(--card2); border: 1px solid var(--border2);
-            border-bottom-left-radius: 4px;
-            transition: background .25s, border-color .25s;
-        }
-        .msg-out {
-            background: linear-gradient(135deg, var(--accent), var(--accent2));
-            color: #fff; border-bottom-right-radius: 4px;
-            box-shadow: 0 3px 12px var(--glow);
-            transition: background .25s, box-shadow .25s;
-        }
-        .msg-time { font-size: 10px; color: var(--muted2); margin-top: 3px; padding: 0 2px; transition: color .25s; }
-        .chat-input-bar {
-            position: fixed; bottom: 60px; left: 0; right: 0;
-            padding: 10px 12px;
-            background: var(--surface);
-            backdrop-filter: blur(20px);
-            border-top: 1px solid var(--border);
-            display: flex; gap: 8px; align-items: center;
-            transition: background .25s, border-color .25s;
-        }
-        .chat-inp {
-            flex: 1; background: var(--card2); border: 1px solid var(--border2);
-            border-radius: 22px; padding: 10px 16px;
-            color: var(--text); font-size: 14px; outline: none; font-family: inherit;
-            transition: background .25s, border-color .25s, color .25s;
-        }
-        .chat-send {
-            width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
-            background: linear-gradient(135deg, var(--accent), var(--accent2));
-            border: none; cursor: pointer; color: #fff; font-size: 17px;
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 3px 10px var(--glow);
-            transition: background .25s, box-shadow .25s;
-        }
-
-        /* ══════════════ SETTINGS ══════════════ */
-        .theme-row {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 13px 16px; border-bottom: 1px solid var(--border);
-            cursor: pointer; transition: background .15s;
-        }
-        .theme-row:last-child { border-bottom: none; }
-        .theme-row:active { background: var(--card2); }
-        .theme-row-left { display: flex; align-items: center; gap: 12px; }
-        .theme-row-icon {
-            width: 34px; height: 34px; border-radius: 9px;
-            display: flex; align-items: center; justify-content: center; font-size: 17px;
-        }
-        .theme-row-name { font-size: 15px; font-weight: 600; }
-
-        .color-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; padding: 14px 16px; }
-        .color-swatch {
-            display: flex; flex-direction: column; align-items: center; gap: 7px;
-            cursor: pointer;
-        }
-        .swatch-circle {
-            width: 44px; height: 44px; border-radius: 50%;
-            border: 3px solid transparent; transition: border-color .2s, transform .15s;
-        }
-        .swatch-circle:active { transform: scale(.92); }
-        .color-swatch.selected .swatch-circle { border-color: var(--text); }
-        .swatch-label { font-size: 11px; color: var(--muted); font-weight: 600; transition: color .25s; }
-        .color-swatch.selected .swatch-label { color: var(--text); }
-
-        /* ══════════════ EMPTY / UTIL ══════════════ */
-        .hidden { display: none !important; }
-        .empty {
-            text-align: center; padding: 44px 20px; color: var(--muted);
-            transition: color .25s;
-        }
-        .empty-icon { font-size: 42px; margin-bottom: 12px; opacity: .55; }
-        .empty p { font-size: 14px; line-height: 1.6; }
-    </style>
+/* ═══════════════ UTIL ═══════════════ */
+.hidden { display:none !important; }
+.sp   { height:12px; }
+.sp8  { height:8px; }
+.empty { text-align:center; padding:40px 20px; color:var(--muted); transition: color .3s; }
+.empty-icon { font-size:40px; margin-bottom:12px; opacity:.5; }
+.empty p { font-size:14px; line-height:1.6; }
+</style>
 </head>
 <body>
 
-<!-- ═══════════════════════════ SHOP ═══════════════════════════ -->
+<canvas id="star-canvas"></canvas>
+
+<!-- ═══════════════════ SHOP ═══════════════════ -->
 <div id="page-shop" class="page active">
-    <div class="page-top">
-        <div class="page-eyebrow">Каталог товаров</div>
-        <div class="page-title">Витрина <span class="accent">✦</span></div>
-    </div>
-    <div class="sp"></div>
-
-    {% for p in products %}
-    <div class="prod-card">
-        <div class="prod-shimmer"></div>
-        {% if p.media %}
-        <div>
-            {% set ext = p.media.split('?')[0].rsplit('.', 1)[-1].lower() %}
-            {% if ext in ['mp4','webm','ogg','mov'] %}
-                <video class="prod-video" controls playsinline preload="metadata">
-                    <source src="{{ p.media }}" type="video/{{ 'mp4' if ext == 'mov' else ext }}">
-                </video>
-            {% else %}
-                <img src="{{ p.media }}" class="prod-img" onerror="this.style.display='none'">
-            {% endif %}
-        </div>
-        {% endif %}
-        <div class="prod-body">
-            <div class="prod-name">{{ p.title }}</div>
-            <div class="prod-desc">{{ p.desc }}</div>
-            <div class="prod-btns2">
-                <button class="btn btn-stars" onclick="triggerBuy('{{p.id}}','stars')">⭐ {{p.stars}} Stars</button>
-                <button class="btn btn-yoo"   onclick="triggerBuy('{{p.id}}','yoomoney')">💳 {{p.rub}} ₽</button>
-            </div>
-            <div class="prod-btn-full">
-                <button class="btn btn-pay-bal" onclick="triggerBuy('{{p.id}}','balance')">👛 С баланса — {{p.rub}} ₽</button>
-            </div>
-            <button class="btn btn-ghost hidden admin-only"
-                    style="margin-top:8px;"
-                    data-pid="{{ p.id }}"
-                    onclick="openEditProduct(this.dataset.pid)">✏️ Редактировать товар</button>
-        </div>
-    </div>
-    {% else %}
-    <div class="empty">
-        <div class="empty-icon">📦</div>
-        <p>Товаров пока нет.<br>Добавьте их в разделе «Админка».</p>
-    </div>
-    {% endfor %}
+  <div class="page-top">
+    <div class="page-eyebrow">Каталог товаров</div>
+    <div class="page-title">Витрина <span class="accent">✦</span></div>
+  </div>
+  <div class="sp8"></div>
+  <div id="shop-catalog">
+    <div class="empty"><div class="empty-icon">📦</div><p>Загрузка…</p></div>
+  </div>
 </div>
 
-<!-- ═══════════════════════════ PROFILE ═══════════════════════════ -->
+<!-- ═══════════════════ PROFILE ═══════════════════ -->
 <div id="page-profile" class="page">
+
+  <!-- Profile home -->
+  <div id="prof-home" class="subpage active">
     <div class="page-top">
-        <div class="page-eyebrow">Ваш аккаунт</div>
-        <div class="page-title">Профиль</div>
+      <div class="page-eyebrow">Ваш аккаунт</div>
+      <div class="page-title">Профиль</div>
     </div>
-    <div class="sp"></div>
+    <div class="sp8"></div>
+
     <div class="profile-hero">
-        <div class="profile-ava">👤</div>
-        <div class="profile-name" id="prof-name">—</div>
-        <div class="profile-id">ID: <span id="prof-id">—</span></div>
-        <div class="balance-row">
-            <div class="balance-val" id="prof-balance">0</div>
-            <div class="balance-cur">₽</div>
-        </div>
+      <div class="profile-ava">👤</div>
+      <div class="profile-name" id="prof-name">—</div>
+      <div class="profile-uid">ID: <span id="prof-id">—</span></div>
+      <div class="balance-row">
+        <div class="balance-val" id="prof-balance">0</div>
+        <div class="balance-cur">₽</div>
+      </div>
     </div>
+
     <div class="section">
-        <div class="sec-label">История заказов</div>
-        <div class="sec-body" id="history-box">
-            <div class="empty"><div class="empty-icon" style="font-size:28px">🧾</div><p>Загрузка…</p></div>
+      <div class="sec-label">Поддержка</div>
+      <div class="sec-body">
+        <div class="cell tappable" onclick="openProfChat()">
+          <div class="cell-icon" style="background:var(--glow2)">💬</div>
+          <div class="cell-body">
+            <div class="cell-title">Написать в поддержку</div>
+            <div class="cell-sub">Ваши сообщения видит администратор</div>
+          </div>
+          <div class="cell-right">›</div>
         </div>
+      </div>
     </div>
+
+    <div class="section">
+      <div class="sec-label">История заказов</div>
+      <div class="sec-body" id="history-box">
+        <div class="empty"><div class="empty-icon" style="font-size:28px">🧾</div><p>Загрузка…</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- User support chat -->
+  <div id="prof-chat" class="subpage">
+    <div class="subpage-hdr">
+      <button class="back-btn" onclick="closeProfChat()">‹</button>
+      <div class="subpage-title">💬 Поддержка</div>
+    </div>
+    <div class="chat-msgs" id="user-chat-msgs">
+      <div class="empty"><div class="empty-icon" style="font-size:28px">💬</div><p>Загрузка…</p></div>
+    </div>
+    <div class="chat-input-bar">
+      <input class="chat-inp" id="user-reply-inp" placeholder="Сообщение администратору…"
+             onkeydown="if(event.key==='Enter')sendUserMsg()">
+      <button class="chat-send" onclick="sendUserMsg()">↑</button>
+    </div>
+  </div>
+
 </div>
 
-<!-- ═══════════════════════════ ADMIN ═══════════════════════════ -->
+<!-- ═══════════════════ ADMIN ═══════════════════ -->
 <div id="page-admin" class="page">
 
-    <!-- Home -->
-    <div id="adm-home" class="subpage active">
-        <div class="page-top">
-            <div class="page-eyebrow">Управление</div>
-            <div class="page-title">Админка <span class="accent">🛡</span></div>
-        </div>
-        <div class="sp"></div>
-        <div class="adm-grid">
-            <div class="adm-tile tile-purple" onclick="openAdm('products')">
-                <div class="adm-tile-ico">📦</div>
-                <div>
-                    <div class="adm-tile-name">Товары</div>
-                    <div class="adm-tile-sub">Добавить / изменить</div>
-                </div>
-            </div>
-            <div class="adm-tile tile-cyan" onclick="openAdm('dialogs')">
-                <div class="adm-tile-ico">💬</div>
-                <div>
-                    <div class="adm-tile-name">Диалоги</div>
-                    <div class="adm-tile-sub" id="adm-dlg-hint">Поддержка</div>
-                </div>
-            </div>
-            <div class="adm-tile tile-amber" onclick="openAdm('balance')">
-                <div class="adm-tile-ico">💰</div>
-                <div>
-                    <div class="adm-tile-name">Балансы</div>
-                    <div class="adm-tile-sub">Пополнить / списать</div>
-                </div>
-            </div>
-            <div class="adm-tile tile-red" onclick="openAdm('audit')">
-                <div class="adm-tile-ico">📊</div>
-                <div>
-                    <div class="adm-tile-name">Аудит</div>
-                    <div class="adm-tile-sub">Транзакции</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Products -->
-    <div id="adm-products" class="subpage">
-        <div class="subpage-hdr">
-            <button class="back-btn" onclick="closeAdm()">‹</button>
-            <div class="subpage-title">📦 Товары</div>
-        </div>
-        <div class="form-sec">
-            <div class="form-lbl" id="form-hdr">Новый товар</div>
-            <div class="form-body">
-                <div class="form-field">
-                    <div class="field-lbl">Название</div>
-                    <input id="form-title" placeholder="VPN Premium" type="text">
-                </div>
-                <div class="form-2col">
-                    <div class="form-field">
-                        <div class="field-lbl">Stars ⭐</div>
-                        <input id="form-stars" placeholder="100" type="number">
-                    </div>
-                    <div class="form-field">
-                        <div class="field-lbl">Рублей ₽</div>
-                        <input id="form-rub" placeholder="350" type="number">
-                    </div>
-                </div>
-                <div class="form-field">
-                    <div class="field-lbl">Описание</div>
-                    <textarea id="form-desc" rows="3" placeholder="Опишите товар..."></textarea>
-                </div>
-                <div class="form-field">
-                    <div class="field-lbl">Автовыдача (ключи, ссылки...)</div>
-                    <textarea id="form-data" rows="2" placeholder="Данные для автовыдачи"></textarea>
-                </div>
-                <div class="form-field">
-                    <div class="field-lbl">Медиа URL (картинка или видео .mp4)</div>
-                    <input id="form-media" placeholder="https://..." type="url">
-                </div>
-            </div>
-            <input type="hidden" id="form-pid" value="new">
-        </div>
-        <div class="form-actions">
-            <button class="btn btn-accent" onclick="submitProduct()">💾 Сохранить товар</button>
-            <button class="btn btn-ghost hidden" id="btn-cancel-edit" onclick="clearProductForm()">✕ Отмена редактирования</button>
-        </div>
-    </div>
-
-    <!-- Dialogs list -->
-    <div id="adm-dialogs" class="subpage">
-        <div class="subpage-hdr">
-            <button class="back-btn" onclick="closeAdm()">‹</button>
-            <div class="subpage-title">💬 Диалоги</div>
-        </div>
-        <div class="section" style="margin-top:4px">
-            <div class="sec-body" id="dlg-list">
-                <div class="empty"><div class="empty-icon" style="font-size:28px">💬</div><p>Загрузка…</p></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Chat -->
-    <div id="adm-chat" class="subpage">
-        <div class="subpage-hdr">
-            <button class="back-btn" onclick="openAdm('dialogs')">‹</button>
-            <div class="subpage-title" id="chat-title">Чат</div>
-        </div>
-        <div class="chat-msgs" id="chat-msgs"></div>
-        <div class="chat-input-bar">
-            <input class="chat-inp" id="reply-inp" placeholder="Написать ответ…" onkeydown="if(event.key==='Enter')sendReply()">
-            <button class="chat-send" onclick="sendReply()">↑</button>
-        </div>
-    </div>
-
-    <!-- Balance -->
-    <div id="adm-balance" class="subpage">
-        <div class="subpage-hdr">
-            <button class="back-btn" onclick="closeAdm()">‹</button>
-            <div class="subpage-title">💰 Балансы</div>
-        </div>
-        <div class="form-sec">
-            <div class="form-lbl">Корректировка баланса</div>
-            <div class="form-body">
-                <div class="form-field">
-                    <div class="field-lbl">ID пользователя Telegram</div>
-                    <input id="adm-uid" placeholder="123456789" type="number">
-                </div>
-                <div class="form-field">
-                    <div class="field-lbl">Сумма (+пополнение / −списание)</div>
-                    <input id="adm-amt" placeholder="500 или -200" type="number">
-                </div>
-            </div>
-        </div>
-        <div class="form-actions">
-            <button class="btn btn-accent" onclick="adjustBalance()">⚡ Применить изменение</button>
-        </div>
-    </div>
-
-    <!-- Audit -->
-    <div id="adm-audit" class="subpage">
-        <div class="subpage-hdr">
-            <button class="back-btn" onclick="closeAdm()">‹</button>
-            <div class="subpage-title">📊 Аудит</div>
-        </div>
-        <div class="section" style="margin-top:4px">
-            <div class="sec-label">Транзакции</div>
-            <div class="sec-body" id="audit-tx">
-                <div class="empty"><div class="empty-icon" style="font-size:28px">📊</div><p>Загрузка…</p></div>
-            </div>
-        </div>
-        <div class="section">
-            <div class="sec-label">Пользователи (топ по балансу)</div>
-            <div class="sec-body" id="audit-users">
-                <div class="empty"><div class="empty-icon" style="font-size:28px">👥</div><p>Загрузка…</p></div>
-            </div>
-        </div>
-    </div>
-
-</div>
-
-<!-- ═══════════════════════════ SETTINGS ═══════════════════════════ -->
-<div id="page-settings" class="page">
+  <div id="adm-home" class="subpage active">
     <div class="page-top">
-        <div class="page-eyebrow">Персонализация</div>
-        <div class="page-title">Настройки <span class="accent">⚙</span></div>
+      <div class="page-eyebrow">Управление</div>
+      <div class="page-title">Админка <span class="accent">🛡</span></div>
     </div>
-    <div class="sp"></div>
-
-    <div class="section">
-        <div class="sec-label">Тема оформления</div>
-        <div class="sec-body">
-            <div class="theme-row" onclick="setTheme('system')">
-                <div class="theme-row-left">
-                    <div class="theme-row-icon" style="background:linear-gradient(135deg,#1c1c1e,#fff)">🌗</div>
-                    <div class="theme-row-name">Системная</div>
-                </div>
-                <span id="chk-system" class="check hidden">✓</span>
-            </div>
-            <div class="theme-row" onclick="setTheme('light')">
-                <div class="theme-row-left">
-                    <div class="theme-row-icon" style="background:#fff8e1">☀️</div>
-                    <div class="theme-row-name">Светлая</div>
-                </div>
-                <span id="chk-light" class="check hidden">✓</span>
-            </div>
-            <div class="theme-row" onclick="setTheme('dark')">
-                <div class="theme-row-left">
-                    <div class="theme-row-icon" style="background:#1c1c2e">🌙</div>
-                    <div class="theme-row-name">Тёмная</div>
-                </div>
-                <span id="chk-dark" class="check hidden">✓</span>
-            </div>
+    <div class="sp8"></div>
+    <div class="adm-grid">
+      <div class="adm-tile tile-purple" onclick="openAdm('products')">
+        <div class="adm-tile-ico">📦</div>
+        <div>
+          <div class="adm-tile-name">Товары</div>
+          <div class="adm-tile-sub">Добавить / изменить</div>
         </div>
-    </div>
-
-    <div class="section">
-        <div class="sec-label">Основной цвет</div>
-        <div class="sec-body">
-            <div class="color-grid">
-                <div class="color-swatch" id="sw-purple" onclick="setAccent('purple')">
-                    <div class="swatch-circle" style="background:linear-gradient(135deg,#7c3aed,#c084fc)"></div>
-                    <div class="swatch-label">Фиолет.</div>
-                </div>
-                <div class="color-swatch" id="sw-red" onclick="setAccent('red')">
-                    <div class="swatch-circle" style="background:linear-gradient(135deg,#dc2626,#f87171)"></div>
-                    <div class="swatch-label">Красный</div>
-                </div>
-                <div class="color-swatch" id="sw-green" onclick="setAccent('green')">
-                    <div class="swatch-circle" style="background:linear-gradient(135deg,#16a34a,#4ade80)"></div>
-                    <div class="swatch-label">Зелёный</div>
-                </div>
-                <div class="color-swatch" id="sw-orange" onclick="setAccent('orange')">
-                    <div class="swatch-circle" style="background:linear-gradient(135deg,#c2410c,#fb923c)"></div>
-                    <div class="swatch-label">Оранж.</div>
-                </div>
-            </div>
+      </div>
+      <div class="adm-tile tile-cyan" onclick="openAdm('dialogs')">
+        <div class="adm-tile-ico">💬</div>
+        <div>
+          <div class="adm-tile-name">Диалоги</div>
+          <div class="adm-tile-sub" id="adm-dlg-hint">Поддержка</div>
         </div>
-    </div>
-
-    <div class="section">
-        <div class="sec-label">О приложении</div>
-        <div class="sec-body">
-            <div class="cell">
-                <div class="cell-body"><div class="cell-title">Версия</div></div>
-                <div class="cell-right">Shop Pro 3.0</div>
-            </div>
+      </div>
+      <div class="adm-tile tile-amber" onclick="openAdm('balance')">
+        <div class="adm-tile-ico">💰</div>
+        <div>
+          <div class="adm-tile-name">Балансы</div>
+          <div class="adm-tile-sub">Пополнить / списать</div>
         </div>
+      </div>
+      <div class="adm-tile tile-red" onclick="openAdm('audit')">
+        <div class="adm-tile-ico">📊</div>
+        <div>
+          <div class="adm-tile-name">Аудит</div>
+          <div class="adm-tile-sub">Транзакции</div>
+        </div>
+      </div>
     </div>
+  </div>
+
+  <!-- Products -->
+  <div id="adm-products" class="subpage">
+    <div class="subpage-hdr">
+      <button class="back-btn" onclick="closeAdm()">‹</button>
+      <div class="subpage-title">📦 Товары</div>
+    </div>
+    <div class="form-sec">
+      <div class="form-lbl" id="form-hdr">Новый товар</div>
+      <div class="form-body">
+        <div class="form-field">
+          <div class="field-lbl">Название</div>
+          <input id="form-title" placeholder="VPN Premium" type="text">
+        </div>
+        <div class="form-2col">
+          <div class="form-field">
+            <div class="field-lbl">Stars ⭐</div>
+            <input id="form-stars" placeholder="100" type="number">
+          </div>
+          <div class="form-field">
+            <div class="field-lbl">Рублей ₽</div>
+            <input id="form-rub" placeholder="350" type="number">
+          </div>
+        </div>
+        <div class="form-field">
+          <div class="field-lbl">Описание</div>
+          <textarea id="form-desc" rows="3" placeholder="Опишите товар…"></textarea>
+        </div>
+        <div class="form-field">
+          <div class="field-lbl">Автовыдача (ключи, ссылки…)</div>
+          <textarea id="form-data" rows="2" placeholder="Данные для автовыдачи"></textarea>
+        </div>
+        <div class="form-field">
+          <div class="field-lbl">Медиа URL (картинка или .mp4)</div>
+          <input id="form-media" placeholder="https://…" type="url">
+        </div>
+      </div>
+      <input type="hidden" id="form-pid" value="new">
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-accent" onclick="submitProduct()">💾 Сохранить товар</button>
+      <button class="btn btn-danger hidden" id="btn-delete" onclick="deleteProduct()">🗑 Удалить товар</button>
+      <button class="btn btn-ghost hidden" id="btn-cancel-edit" onclick="clearProductForm()">✕ Отмена редактирования</button>
+    </div>
+  </div>
+
+  <!-- Dialogs -->
+  <div id="adm-dialogs" class="subpage">
+    <div class="subpage-hdr">
+      <button class="back-btn" onclick="closeAdm()">‹</button>
+      <div class="subpage-title">💬 Диалоги</div>
+    </div>
+    <div class="section" style="margin-top:4px">
+      <div class="sec-body" id="dlg-list">
+        <div class="empty"><div class="empty-icon" style="font-size:28px">💬</div><p>Загрузка…</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chat with user -->
+  <div id="adm-chat" class="subpage">
+    <div class="subpage-hdr">
+      <button class="back-btn" onclick="openAdm('dialogs')">‹</button>
+      <div class="subpage-title" id="adm-chat-title">Чат</div>
+    </div>
+    <div class="chat-msgs" id="adm-chat-msgs"></div>
+    <div class="chat-input-bar">
+      <input class="chat-inp" id="adm-reply-inp" placeholder="Ответить пользователю…"
+             onkeydown="if(event.key==='Enter')sendAdminReply()">
+      <button class="chat-send" onclick="sendAdminReply()">↑</button>
+    </div>
+  </div>
+
+  <!-- Balance -->
+  <div id="adm-balance" class="subpage">
+    <div class="subpage-hdr">
+      <button class="back-btn" onclick="closeAdm()">‹</button>
+      <div class="subpage-title">💰 Балансы</div>
+    </div>
+    <div class="form-sec">
+      <div class="form-lbl">Корректировка баланса</div>
+      <div class="form-body">
+        <div class="form-field">
+          <div class="field-lbl">ID пользователя Telegram</div>
+          <input id="adm-uid" placeholder="123456789" type="number">
+        </div>
+        <div class="form-field">
+          <div class="field-lbl">Сумма (+пополнение / −списание)</div>
+          <input id="adm-amt" placeholder="500 или -200" type="number">
+        </div>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-accent" onclick="adjustBalance()">⚡ Применить</button>
+    </div>
+  </div>
+
+  <!-- Audit -->
+  <div id="adm-audit" class="subpage">
+    <div class="subpage-hdr">
+      <button class="back-btn" onclick="closeAdm()">‹</button>
+      <div class="subpage-title">📊 Аудит</div>
+    </div>
+    <div class="section" style="margin-top:4px">
+      <div class="sec-label">Транзакции</div>
+      <div class="sec-body" id="audit-tx">
+        <div class="empty"><div class="empty-icon" style="font-size:28px">📊</div><p>Загрузка…</p></div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="sec-label">Пользователи</div>
+      <div class="sec-body" id="audit-users">
+        <div class="empty"><div class="empty-icon" style="font-size:28px">👥</div><p>Загрузка…</p></div>
+      </div>
+    </div>
+  </div>
+
 </div>
 
-<!-- ═══════════════════════════ TAB BAR ═══════════════════════════ -->
+<!-- ═══════════════════ SETTINGS ═══════════════════ -->
+<div id="page-settings" class="page">
+  <div class="page-top">
+    <div class="page-eyebrow">Персонализация</div>
+    <div class="page-title">Настройки <span class="accent">⚙</span></div>
+  </div>
+  <div class="sp8"></div>
+
+  <div class="section">
+    <div class="sec-label">Тема оформления</div>
+    <div class="sec-body">
+      <div class="theme-row" onclick="setTheme('system')">
+        <div class="theme-row-left">
+          <div class="theme-row-icon" style="background:linear-gradient(135deg,#1c1c2e 50%,#f0eff8 50%)">🌗</div>
+          <div class="theme-row-name">Системная</div>
+        </div>
+        <span id="chk-system" class="check hidden">✓</span>
+      </div>
+      <div class="theme-row" onclick="setTheme('light')">
+        <div class="theme-row-left">
+          <div class="theme-row-icon" style="background:#fff8e1">☀️</div>
+          <div class="theme-row-name">Светлая</div>
+        </div>
+        <span id="chk-light" class="check hidden">✓</span>
+      </div>
+      <div class="theme-row" onclick="setTheme('dark')">
+        <div class="theme-row-left">
+          <div class="theme-row-icon" style="background:#0f0c1f">🌙</div>
+          <div class="theme-row-name">Тёмная</div>
+        </div>
+        <span id="chk-dark" class="check hidden">✓</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="sec-label">Основной цвет</div>
+    <div class="sec-body">
+      <div class="color-grid">
+        <div class="color-swatch" id="sw-purple" onclick="setAccent('purple')">
+          <div class="swatch-circle" style="background:linear-gradient(135deg,#7c3aed,#c084fc)"></div>
+          <div class="swatch-label">Фиолет.</div>
+        </div>
+        <div class="color-swatch" id="sw-red" onclick="setAccent('red')">
+          <div class="swatch-circle" style="background:linear-gradient(135deg,#b91c1c,#fca5a5)"></div>
+          <div class="swatch-label">Красный</div>
+        </div>
+        <div class="color-swatch" id="sw-green" onclick="setAccent('green')">
+          <div class="swatch-circle" style="background:linear-gradient(135deg,#15803d,#86efac)"></div>
+          <div class="swatch-label">Зелёный</div>
+        </div>
+        <div class="color-swatch" id="sw-orange" onclick="setAccent('orange')">
+          <div class="swatch-circle" style="background:linear-gradient(135deg,#c2410c,#fdba74)"></div>
+          <div class="swatch-label">Оранж.</div>
+        </div>
+        <div class="color-swatch" id="sw-blue" onclick="setAccent('blue')">
+          <div class="swatch-circle" style="background:linear-gradient(135deg,#1d4ed8,#93c5fd)"></div>
+          <div class="swatch-label">Синий</div>
+        </div>
+        <div class="color-swatch" id="sw-yellow" onclick="setAccent('yellow')">
+          <div class="swatch-circle" style="background:linear-gradient(135deg,#a16207,#fde047)"></div>
+          <div class="swatch-label">Жёлтый</div>
+        </div>
+        <div class="color-swatch" id="sw-pink" onclick="setAccent('pink')">
+          <div class="swatch-circle" style="background:linear-gradient(135deg,#9d174d,#f9a8d4)"></div>
+          <div class="swatch-label">Розовый</div>
+        </div>
+        <div class="color-swatch" id="sw-cyan" onclick="setAccent('cyan')">
+          <div class="swatch-circle" style="background:linear-gradient(135deg,#0e7490,#67e8f9)"></div>
+          <div class="swatch-label">Голубой</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="sec-label">О приложении</div>
+    <div class="sec-body">
+      <div class="cell">
+        <div class="cell-body"><div class="cell-title">Версия</div></div>
+        <div class="cell-right">Shop Pro 3.0</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB BAR -->
 <nav class="tab-bar">
-    <button class="tab-item active" id="tab-shop" onclick="switchPage('shop',this)">
-        <div class="tab-notch"></div>
-        <span class="tab-icon">🛒</span>Витрина
-    </button>
-    <button class="tab-item" id="tab-profile" onclick="switchPage('profile',this)">
-        <div class="tab-notch"></div>
-        <span class="tab-icon">👤</span>Профиль
-    </button>
-    <button class="tab-item hidden" id="tab-admin" onclick="switchPage('admin',this)">
-        <div class="tab-notch"></div>
-        <span class="tab-icon">🛡️</span>Админка
-        <span class="tab-badge hidden" id="adm-badge"></span>
-    </button>
-    <button class="tab-item" id="tab-settings" onclick="switchPage('settings',this)">
-        <div class="tab-notch"></div>
-        <span class="tab-icon">⚙️</span>Настройки
-    </button>
+  <button class="tab-item active" id="tab-shop"     onclick="switchPage('shop',this)">
+    <div class="tab-notch"></div><span class="tab-icon">🛒</span>Витрина
+  </button>
+  <button class="tab-item"        id="tab-profile"  onclick="switchPage('profile',this)">
+    <div class="tab-notch"></div><span class="tab-icon">👤</span>Профиль
+  </button>
+  <button class="tab-item hidden" id="tab-admin"    onclick="switchPage('admin',this)">
+    <div class="tab-notch"></div><span class="tab-icon">🛡️</span>Админка
+    <span class="tab-badge hidden" id="adm-badge"></span>
+  </button>
+  <button class="tab-item"        id="tab-settings" onclick="switchPage('settings',this)">
+    <div class="tab-notch"></div><span class="tab-icon">⚙️</span>Настройки
+  </button>
 </nav>
 
-<!-- Products JS map (safe, no inline onclick JSON) -->
 <script>
-const ALL_PRODUCTS = {
-    {% for p in products %}
-    "{{ p.id }}": {{ p | tojson }},
-    {% endfor %}
-};
-</script>
+/* ═══════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════ */
+const tg       = window.Telegram.WebApp;
+tg.ready(); tg.expand();
+const user     = tg.initDataUnsafe.user || { id:0, username:"dev_user", first_name:"Dev" };
+const ADMIN_ID = {{ admin_id }};
 
-<script>
-    const tg = window.Telegram.WebApp;
-    tg.ready(); tg.expand();
-    const user = tg.initDataUnsafe.user || { id: 0, username: "dev_user", first_name: "Dev" };
-    const ADMIN_ID = {{ admin_id }};
-    let currentChatUid = null;
+// ── Product cache ──
+let PRODUCTS   = {};        // keyed by id
+let currentChatUid = null;
 
-    /* ═══════ THEME SYSTEM ═══════ */
-    const THEMES  = ['dark','light','system'];
-    const ACCENTS = ['purple','red','green','orange'];
+/* ═══════════════════════════════════════════
+   STAR FIELD
+═══════════════════════════════════════════ */
+(function initStars() {
+  const canvas = document.getElementById('star-canvas');
+  const ctx    = canvas.getContext('2d');
+  let W, H, stars = [];
 
-    function applyTheme(t) {
-        document.body.classList.remove(...THEMES.map(x => 'theme-'+x));
-        if (t === 'system') {
-            const dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            document.body.classList.add(dark ? 'theme-dark' : 'theme-light');
-            document.body.classList.add('theme-system');
-        } else {
-            document.body.classList.add('theme-' + t);
-        }
-        THEMES.forEach(x => document.getElementById('chk-'+x)?.classList.add('hidden'));
-        document.getElementById('chk-'+t)?.classList.remove('hidden');
-    }
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
 
-    function setTheme(t) {
-        localStorage.setItem('sp_theme', t);
-        applyTheme(t);
-    }
+  function mkStar() {
+    return {
+      x: Math.random() * W,
+      y: Math.random() * H,
+      r: Math.random() * 1.1 + 0.2,
+      base: Math.random() * 0.6 + 0.1,
+      phase: Math.random() * Math.PI * 2,
+      speed: Math.random() * 0.8 + 0.3
+    };
+  }
+  for (let i = 0; i < 160; i++) stars.push(mkStar());
 
-    function applyAccent(a) {
-        document.body.classList.remove(...ACCENTS.map(x => 'accent-'+x));
-        document.body.classList.add('accent-' + a);
-        ACCENTS.forEach(x => document.getElementById('sw-'+x)?.classList.remove('selected'));
-        document.getElementById('sw-'+a)?.classList.add('selected');
-    }
+  // subtle purple nebula patches
+  const nebulae = [
+    { x:0.2, y:0.15, r:0.25 },
+    { x:0.75, y:0.6, r:0.22 },
+    { x:0.5,  y:0.9, r:0.18 }
+  ];
 
-    function setAccent(a) {
-        localStorage.setItem('sp_accent', a);
-        applyAccent(a);
-    }
+  function draw(t) {
+    ctx.clearRect(0, 0, W, H);
 
-    // Listen for system theme change
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-        if (localStorage.getItem('sp_theme') === 'system') applyTheme('system');
+    // nebula glow
+    nebulae.forEach(n => {
+      const gr = ctx.createRadialGradient(n.x*W, n.y*H, 0, n.x*W, n.y*H, n.r*Math.min(W,H));
+      gr.addColorStop(0, 'rgba(90,20,160,0.06)');
+      gr.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = gr;
+      ctx.fillRect(0, 0, W, H);
     });
 
-    // Load saved prefs on init
-    (function() {
-        const savedTheme  = localStorage.getItem('sp_theme')  || 'dark';
-        const savedAccent = localStorage.getItem('sp_accent') || 'purple';
-        applyTheme(savedTheme);
-        applyAccent(savedAccent);
-    })();
+    // stars
+    stars.forEach(s => {
+      const a = s.base + Math.sin(t * 0.001 * s.speed + s.phase) * (s.base * 0.6);
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+      ctx.fillStyle = `rgba(220,210,255,${a})`;
+      ctx.fill();
+    });
 
-    /* ═══════ ADMIN INIT ═══════ */
-    if (user.id === ADMIN_ID || user.id === 0) {
-        document.getElementById("tab-admin").classList.remove("hidden");
-        document.querySelectorAll(".admin-only").forEach(el => el.classList.remove("hidden"));
+    requestAnimationFrame(draw);
+  }
+  requestAnimationFrame(draw);
+})();
+
+/* ═══════════════════════════════════════════
+   THEME / ACCENT
+═══════════════════════════════════════════ */
+const THEMES  = ['dark','light','system'];
+const ACCENTS = ['purple','red','green','orange','blue','yellow','pink','cyan'];
+
+function applyTheme(t) {
+  document.body.classList.remove(...THEMES.map(x=>'theme-'+x));
+  if (t === 'system') {
+    const dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    document.body.classList.add(dark ? 'theme-dark' : 'theme-light');
+    document.body.classList.add('theme-system');
+  } else {
+    document.body.classList.add('theme-'+t);
+  }
+  THEMES.forEach(x => document.getElementById('chk-'+x)?.classList.add('hidden'));
+  document.getElementById('chk-'+t)?.classList.remove('hidden');
+}
+
+function setTheme(t) { localStorage.setItem('sp_theme',t); applyTheme(t); }
+
+function applyAccent(a) {
+  document.body.classList.remove(...ACCENTS.map(x=>'accent-'+x));
+  document.body.classList.add('accent-'+a);
+  ACCENTS.forEach(x => document.getElementById('sw-'+x)?.classList.remove('selected'));
+  document.getElementById('sw-'+a)?.classList.add('selected');
+}
+
+function setAccent(a) { localStorage.setItem('sp_accent',a); applyAccent(a); }
+
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+  if (localStorage.getItem('sp_theme') === 'system') applyTheme('system');
+});
+
+// Load prefs
+applyTheme(localStorage.getItem('sp_theme')   || 'dark');
+applyAccent(localStorage.getItem('sp_accent') || 'purple');
+
+/* ═══════════════════════════════════════════
+   ADMIN UNLOCK
+═══════════════════════════════════════════ */
+if (user.id === ADMIN_ID || user.id === 0) {
+  document.getElementById('tab-admin').classList.remove('hidden');
+  document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
+}
+
+/* ═══════════════════════════════════════════
+   TABS
+═══════════════════════════════════════════ */
+function switchPage(name, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-item').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  btn.classList.add('active');
+  if (name === 'profile') loadProfile();
+  if (name === 'admin')   { showAdmHome(); fetchDlgBadge(); }
+}
+
+/* ═══════════════════════════════════════════
+   PRODUCTS  (client-side render, no reload)
+═══════════════════════════════════════════ */
+async function loadProducts() {
+  const prods = await fetch('/api/products').then(r=>r.json());
+  PRODUCTS = {};
+  prods.forEach(p => PRODUCTS[String(p.id)] = p);
+  renderCatalog(prods);
+}
+
+function renderCatalog(prods) {
+  const catalog = document.getElementById('shop-catalog');
+  if (!prods.length) {
+    catalog.innerHTML = '<div class="empty"><div class="empty-icon">📦</div><p>Товаров пока нет.<br>Добавьте их в Админке.</p></div>';
+    return;
+  }
+  catalog.innerHTML = prods.map(p => {
+    let media = '';
+    if (p.media) {
+      const ext = p.media.split('?')[0].split('.').pop().toLowerCase();
+      if (['mp4','webm','ogg','mov'].includes(ext)) {
+        media = `<video class="prod-video" controls playsinline preload="metadata"><source src="${esc(p.media)}"></video>`;
+      } else {
+        media = `<img src="${esc(p.media)}" class="prod-img" onerror="this.style.display='none'">`;
+      }
     }
+    const isAdmin = user.id===ADMIN_ID || user.id===0;
+    return `
+      <div class="prod-card" id="pcard-${p.id}">
+        <div class="prod-shimmer"></div>
+        ${media}
+        <div class="prod-body">
+          <div class="prod-name">${esc(p.title)}</div>
+          <div class="prod-desc">${esc(p.desc||'')}</div>
+          <div class="prod-btns2">
+            <button class="btn btn-stars"   onclick="triggerBuy('${p.id}','stars')">⭐ ${p.stars} Stars</button>
+            <button class="btn btn-yoo"     onclick="triggerBuy('${p.id}','yoomoney')">💳 ${p.rub} ₽</button>
+          </div>
+          <div class="prod-btn-full">
+            <button class="btn btn-pay-bal" onclick="triggerBuy('${p.id}','balance')">👛 С баланса — ${p.rub} ₽</button>
+          </div>
+          ${isAdmin ? `<button class="btn btn-ghost" style="margin-top:8px" data-pid="${p.id}" onclick="openEditProduct(this.dataset.pid)">✏️ Редактировать товар</button>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+}
 
-    /* ═══════ PAGE SWITCHING ═══════ */
-    function switchPage(name, btn) {
-        document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
-        document.querySelectorAll(".tab-item").forEach(b => b.classList.remove("active"));
-        document.getElementById("page-" + name).classList.add("active");
-        btn.classList.add("active");
-        if (name === "profile") loadProfile();
-        if (name === "admin")   { showAdmHome(); fetchDlgBadge(); }
+loadProducts();
+
+/* ═══════════════════════════════════════════
+   ADMIN — NAVIGATION
+═══════════════════════════════════════════ */
+function showAdmHome() {
+  document.querySelectorAll('#page-admin .subpage').forEach(s=>s.classList.remove('active'));
+  document.getElementById('adm-home').classList.add('active');
+}
+function openAdm(sec) {
+  document.querySelectorAll('#page-admin .subpage').forEach(s=>s.classList.remove('active'));
+  document.getElementById('adm-'+sec).classList.add('active');
+  if (sec==='dialogs') loadDialogs();
+  if (sec==='audit')   loadAudit();
+}
+function closeAdm() { showAdmHome(); }
+
+/* ═══════════════════════════════════════════
+   PRODUCT FORM
+═══════════════════════════════════════════ */
+function openEditProduct(pid) {
+  const p = PRODUCTS[pid];
+  if (!p) return;
+  switchPage('admin', document.getElementById('tab-admin'));
+  openAdm('products');
+  document.getElementById('form-hdr').innerText     = 'Редактировать: ' + p.title;
+  document.getElementById('form-pid').value         = p.id;
+  document.getElementById('form-title').value       = p.title  || '';
+  document.getElementById('form-stars').value       = p.stars  || '';
+  document.getElementById('form-rub').value         = p.rub    || '';
+  document.getElementById('form-desc').value        = p.desc   || '';
+  document.getElementById('form-data').value        = p.data   || '';
+  document.getElementById('form-media').value       = p.media  || '';
+  document.getElementById('btn-delete').classList.remove('hidden');
+  document.getElementById('btn-cancel-edit').classList.remove('hidden');
+}
+
+function clearProductForm() {
+  document.getElementById('form-hdr').innerText = 'Новый товар';
+  ['form-title','form-stars','form-rub','form-desc','form-data','form-media']
+    .forEach(id => document.getElementById(id).value = '');
+  document.getElementById('form-pid').value = 'new';
+  document.getElementById('btn-delete').classList.add('hidden');
+  document.getElementById('btn-cancel-edit').classList.add('hidden');
+}
+
+async function submitProduct() {
+  const pid  = document.getElementById('form-pid').value;
+  const fd   = new FormData();
+  fd.append('id',          pid);
+  fd.append('title',       document.getElementById('form-title').value);
+  fd.append('price_stars', document.getElementById('form-stars').value);
+  fd.append('price_rub',   document.getElementById('form-rub').value);
+  fd.append('description', document.getElementById('form-desc').value);
+  fd.append('auto_data',   document.getElementById('form-data').value);
+  fd.append('media_url',   document.getElementById('form-media').value);
+  const r = await fetch('/api/admin/save-product', { method:'POST', body:fd });
+  if (r.ok) {
+    clearProductForm();
+    await loadProducts();          // refresh catalog without page reload
+    tg.showAlert('✅ Товар сохранён!');
+  } else {
+    tg.showAlert('❌ Ошибка сохранения.');
+  }
+}
+
+async function deleteProduct() {
+  const pid = document.getElementById('form-pid').value;
+  if (pid === 'new') return;
+  tg.showPopup({
+    title:'🗑 Удалить товар?',
+    message:'Это действие нельзя отменить.',
+    buttons:[
+      { id:'yes', type:'destructive', text:'Удалить' },
+      { type:'cancel', text:'Отмена' }
+    ]
+  }, async btn => {
+    if (btn !== 'yes') return;
+    const r = await fetch('/api/admin/delete-product', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ id: parseInt(pid) })
+    });
+    if (r.ok) {
+      clearProductForm();
+      await loadProducts();
+      closeAdm();
+      tg.showAlert('🗑 Товар удалён.');
     }
+  });
+}
 
-    /* ═══════ ADMIN NAVIGATION ═══════ */
-    function showAdmHome() {
-        document.querySelectorAll("#page-admin .subpage").forEach(s => s.classList.remove("active"));
-        document.getElementById("adm-home").classList.add("active");
-    }
-    function openAdm(sec) {
-        document.querySelectorAll("#page-admin .subpage").forEach(s => s.classList.remove("active"));
-        document.getElementById("adm-" + sec).classList.add("active");
-        if (sec === "dialogs") loadDialogs();
-        if (sec === "audit")   loadAudit();
-    }
-    function closeAdm() { showAdmHome(); }
+/* ═══════════════════════════════════════════
+   PROFILE
+═══════════════════════════════════════════ */
+async function loadProfile() {
+  document.getElementById('prof-id').innerText   = user.id;
+  document.getElementById('prof-name').innerText =
+    [user.first_name, user.last_name].filter(Boolean).join(' ') || '@'+(user.username||user.id);
 
-    /* ═══════ EDIT PRODUCT (via data map — no inline JSON issues) ═══════ */
-    function openEditProduct(pid) {
-        const p = ALL_PRODUCTS[pid];
-        if (!p) { console.error("Product not found:", pid); return; }
-        switchPage("admin", document.getElementById("tab-admin"));
-        openAdm("products");
-        document.getElementById("form-hdr").innerText = "Редактировать: " + p.title;
-        document.getElementById("form-pid").value    = p.id;
-        document.getElementById("form-title").value  = p.title   || "";
-        document.getElementById("form-stars").value  = p.stars   || "";
-        document.getElementById("form-rub").value    = p.rub     || "";
-        document.getElementById("form-desc").value   = p.desc    || "";
-        document.getElementById("form-data").value   = p.data    || "";
-        document.getElementById("form-media").value  = p.media   || "";
-        document.getElementById("btn-cancel-edit").classList.remove("hidden");
-    }
+  const d = await fetch('/api/profile/'+user.id).then(r=>r.json());
+  document.getElementById('prof-balance').innerText = d.balance;
 
-    function clearProductForm() {
-        document.getElementById("form-hdr").innerText = "Новый товар";
-        ["form-title","form-stars","form-rub","form-desc","form-data","form-media"]
-            .forEach(id => document.getElementById(id).value = "");
-        document.getElementById("form-pid").value = "new";
-        document.getElementById("btn-cancel-edit").classList.add("hidden");
-    }
+  const ico = {stars:'⭐',yoomoney:'💳',balance:'👛'};
+  const bg  = {stars:'rgba(217,119,6,.15)',yoomoney:'rgba(124,58,237,.15)',balance:'rgba(37,99,235,.15)'};
+  document.getElementById('history-box').innerHTML = d.history.length
+    ? d.history.map(h => `
+        <div class="order-row">
+          <div class="order-icon" style="background:${bg[h.type]||'var(--card2)'}">${ico[h.type]||'📦'}</div>
+          <div class="order-info">
+            <div class="order-name">${esc(h.title||'Операция')}</div>
+            <div class="order-meta">${h.type.toUpperCase()} · ${h.amount} · ${h.date}</div>
+            ${h.charge_id?`<div style="font-size:10px;color:var(--muted2);font-family:monospace">${h.charge_id}</div>`:''}
+          </div>
+          <span class="badge badge-${h.status==='paid'?'paid':h.status==='declined'?'declined':'pending'}">
+            ${h.status==='paid'?'✓ Оплачен':h.status==='declined'?'✗ Откл.':'⏳ Ожид.'}
+          </span>
+        </div>`).join('')
+    : '<div class="empty"><div class="empty-icon" style="font-size:28px">🧾</div><p>Заказов пока нет</p></div>';
+}
 
-    async function submitProduct() {
-        const fd = new FormData();
-        fd.append("id",          document.getElementById("form-pid").value);
-        fd.append("title",       document.getElementById("form-title").value);
-        fd.append("price_stars", document.getElementById("form-stars").value);
-        fd.append("price_rub",   document.getElementById("form-rub").value);
-        fd.append("description", document.getElementById("form-desc").value);
-        fd.append("auto_data",   document.getElementById("form-data").value);
-        fd.append("media_url",   document.getElementById("form-media").value);
-        const r = await fetch("/api/admin/save-product", { method: "POST", body: fd });
-        if (r.ok) {
-            clearProductForm();
-            tg.showAlert("✅ Товар сохранён! Перезагрузите страницу для обновления каталога.");
-        } else {
-            tg.showAlert("❌ Ошибка сохранения.");
-        }
-    }
+/* ═══════════════════════════════════════════
+   USER SUPPORT CHAT
+═══════════════════════════════════════════ */
+function openProfChat() {
+  document.querySelectorAll('#page-profile .subpage').forEach(s=>s.classList.remove('active'));
+  document.getElementById('prof-chat').classList.add('active');
+  loadUserChat();
+}
+function closeProfChat() {
+  document.querySelectorAll('#page-profile .subpage').forEach(s=>s.classList.remove('active'));
+  document.getElementById('prof-home').classList.add('active');
+}
 
-    /* ═══════ PROFILE ═══════ */
-    async function loadProfile() {
-        document.getElementById("prof-id").innerText = user.id;
-        document.getElementById("prof-name").innerText =
-            [user.first_name, user.last_name].filter(Boolean).join(" ") || "@" + (user.username || user.id);
-        const r = await fetch("/api/profile/" + user.id);
-        const d = await r.json();
-        document.getElementById("prof-balance").innerText = d.balance;
+async function loadUserChat() {
+  const d = await fetch('/api/user/messages/'+user.id).then(r=>r.json());
+  const box = document.getElementById('user-chat-msgs');
+  box.innerHTML = d.messages.length
+    ? d.messages.map(m => `
+        <div class="msg-wrap ${m.direction==='out'?'out':''}">
+          <div class="msg-bub msg-${m.direction==='in'?'in':'out'}">${esc(m.text)}</div>
+          <div class="msg-time">${m.date}</div>
+        </div>`).join('')
+    : '<div class="empty"><div class="empty-icon" style="font-size:28px">💬</div><p>Напишите сообщение — оно уйдёт администратору</p></div>';
+  box.scrollTop = box.scrollHeight;
+}
 
-        const tIco = { stars:"⭐", yoomoney:"💳", balance:"👛" };
-        const tBg  = { stars:"rgba(217,119,6,.15)", yoomoney:"rgba(124,58,237,.15)", balance:"rgba(37,99,235,.15)" };
+async function sendUserMsg() {
+  const inp  = document.getElementById('user-reply-inp');
+  const text = inp.value.trim();
+  if (!text) return;
+  inp.value  = '';
+  const r = await fetch('/api/user/send-message', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ user_id:user.id, username:user.username||String(user.id), text })
+  });
+  const d = await r.json();
+  if (d.error) { tg.showAlert('Ошибка: '+d.error); inp.value=text; return; }
+  await loadUserChat();
+}
 
-        document.getElementById("history-box").innerHTML = d.history.length
-            ? d.history.map(h => `
-                <div class="order-row">
-                    <div class="order-icon" style="background:${tBg[h.type]||'var(--card2)'}">
-                        ${tIco[h.type]||"📦"}
-                    </div>
-                    <div class="order-info">
-                        <div class="order-name">${h.title || "Операция"}</div>
-                        <div class="order-meta">${h.type.toUpperCase()} · ${h.amount} · ${h.date}</div>
-                        ${h.charge_id ? `<div style="font-size:10px;color:var(--muted2);font-family:monospace;margin-top:2px">${h.charge_id}</div>` : ""}
-                    </div>
-                    <span class="badge badge-${h.status==="paid"?"paid":h.status==="declined"?"declined":"pending"}">
-                        ${h.status==="paid"?"✓ Оплачен":h.status==="declined"?"✗ Откл.":"⏳ Ожид."}
-                    </span>
-                </div>
-            `).join("")
-            : `<div class="empty"><div class="empty-icon" style="font-size:28px">🧾</div><p>Заказов пока нет</p></div>`;
-    }
+/* ═══════════════════════════════════════════
+   ADMIN — DIALOGS BADGE
+═══════════════════════════════════════════ */
+async function fetchDlgBadge() {
+  const d = await fetch('/api/admin/dialogs').then(r=>r.json());
+  const unread = d.dialogs.reduce((s,dl)=>s+(dl.unread||0),0);
+  const badge  = document.getElementById('adm-badge');
+  if (unread>0) {
+    badge.classList.remove('hidden'); badge.innerText=unread;
+    document.getElementById('adm-dlg-hint').innerText=unread+' непрочит.';
+  } else {
+    badge.classList.add('hidden');
+    document.getElementById('adm-dlg-hint').innerText='Поддержка';
+  }
+}
 
-    /* ═══════ DIALOGS BADGE ═══════ */
-    async function fetchDlgBadge() {
-        const r = await fetch("/api/admin/dialogs");
-        const d = await r.json();
-        const unread = d.dialogs.reduce((s, dl) => s + (dl.unread || 0), 0);
-        const badge = document.getElementById("adm-badge");
-        if (unread > 0) {
-            badge.classList.remove("hidden");
-            badge.innerText = unread;
-            document.getElementById("adm-dlg-hint").innerText = unread + " непрочит.";
-        } else {
-            badge.classList.add("hidden");
-            document.getElementById("adm-dlg-hint").innerText = "Поддержка";
-        }
-    }
+async function loadDialogs() {
+  const d = await fetch('/api/admin/dialogs').then(r=>r.json());
+  document.getElementById('dlg-list').innerHTML = d.dialogs.length
+    ? d.dialogs.map(dl=>`
+        <div class="dialog-row" onclick="openAdminChat(${dl.user_id},'@${dl.username||dl.user_id}')">
+          <div class="d-ava">👤</div>
+          <div class="d-info">
+            <div class="d-name">@${dl.username||dl.user_id}</div>
+            <div class="d-last">${esc(dl.last_msg||'—')}</div>
+          </div>
+          ${dl.unread>0
+            ?`<div class="d-badge">${dl.unread}</div>`
+            :`<div class="d-time">${(dl.last_date||'').split(' ')[1]||''}</div>`}
+        </div>`).join('')
+    : '<div class="empty"><div class="empty-icon" style="font-size:28px">💬</div><p>Диалогов нет.<br>Пользователи ещё не писали.</p></div>';
+}
 
-    async function loadDialogs() {
-        const r = await fetch("/api/admin/dialogs");
-        const d = await r.json();
-        document.getElementById("dlg-list").innerHTML = d.dialogs.length
-            ? d.dialogs.map(dl => `
-                <div class="dialog-row" onclick="openChat(${dl.user_id},'@${dl.username||dl.user_id}')">
-                    <div class="d-ava">👤</div>
-                    <div class="d-info">
-                        <div class="d-name">@${dl.username||dl.user_id}</div>
-                        <div class="d-last">${dl.last_msg||"—"}</div>
-                    </div>
-                    ${dl.unread>0
-                        ? `<div class="d-badge">${dl.unread}</div>`
-                        : `<div class="d-time">${(dl.last_date||"").split(" ")[1]||""}</div>`}
-                </div>
-            `).join("")
-            : `<div class="empty"><div class="empty-icon" style="font-size:28px">💬</div><p>Диалогов нет.<br>Пользователи ещё не писали боту.</p></div>`;
-    }
+async function openAdminChat(uid, label) {
+  currentChatUid = uid;
+  document.getElementById('adm-chat-title').innerText = label;
+  openAdm('chat');
+  await refreshAdminChat();
+}
 
-    async function openChat(uid, label) {
-        currentChatUid = uid;
-        document.getElementById("chat-title").innerText = label;
-        openAdm("chat");
-        await refreshChat();
-    }
+async function refreshAdminChat() {
+  if (!currentChatUid) return;
+  const d = await fetch('/api/admin/dialog/'+currentChatUid).then(r=>r.json());
+  const box = document.getElementById('adm-chat-msgs');
+  box.innerHTML = d.messages.length
+    ? d.messages.map(m=>`
+        <div class="msg-wrap ${m.direction==='out'?'out':''}">
+          <div class="msg-bub msg-${m.direction==='in'?'in':'out'}">${esc(m.text)}</div>
+          <div class="msg-time">${m.date}</div>
+        </div>`).join('')
+    : '<div class="empty"><div class="empty-icon" style="font-size:28px">💬</div><p>Нет сообщений</p></div>';
+  box.scrollTop = box.scrollHeight;
+}
 
-    async function refreshChat() {
-        if (!currentChatUid) return;
-        const r = await fetch("/api/admin/dialog/" + currentChatUid);
-        const d = await r.json();
-        const box = document.getElementById("chat-msgs");
-        box.innerHTML = d.messages.length
-            ? d.messages.map(m => `
-                <div class="msg-wrap ${m.direction==="out"?"out":""}">
-                    <div class="msg-bub msg-${m.direction==="in"?"in":"out"}">${esc(m.text)}</div>
-                    <div class="msg-time">${m.date}</div>
-                </div>
-            `).join("")
-            : `<div class="empty"><div class="empty-icon" style="font-size:28px">💬</div><p>Нет сообщений</p></div>`;
-        box.scrollTop = box.scrollHeight;
-    }
+async function sendAdminReply() {
+  const inp  = document.getElementById('adm-reply-inp');
+  const text = inp.value.trim();
+  if (!text || !currentChatUid) return;
+  inp.value  = '';
+  const r = await fetch('/api/admin/reply', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ user_id:currentChatUid, text })
+  });
+  const d = await r.json();
+  if (d.error) { tg.showAlert('Ошибка: '+d.error); inp.value=text; return; }
+  await refreshAdminChat();
+}
 
-    async function sendReply() {
-        const inp = document.getElementById("reply-inp");
-        const text = inp.value.trim();
-        if (!text || !currentChatUid) return;
-        inp.value = "";
-        const r = await fetch("/api/admin/reply", {
-            method: "POST", headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ user_id: currentChatUid, text })
-        });
-        const d = await r.json();
-        if (d.error) { tg.showAlert("Ошибка: " + d.error); inp.value = text; return; }
-        await refreshChat();
-    }
+/* ═══════════════════════════════════════════
+   AUDIT & BALANCE
+═══════════════════════════════════════════ */
+async function loadAudit() {
+  const d = await fetch('/api/admin/data').then(r=>r.json());
+  document.getElementById('audit-tx').innerHTML = d.transactions.length
+    ? d.transactions.map(t=>`
+        <div class="tx-row">
+          <div class="tx-top">
+            <div class="tx-name">№${t.id} — @${t.username}</div>
+            <span class="badge badge-${t.status==='paid'?'paid':t.status==='declined'?'declined':'pending'}">
+              ${t.status==='paid'?'✓ Оплачен':t.status==='declined'?'✗ Откл.':'⏳ Ожид.'}
+            </span>
+          </div>
+          <div class="tx-meta">${esc(t.title||'—')} · ${t.type.toUpperCase()} · ${t.amount} ед.</div>
+          ${t.charge_id?`<div class="tx-id">TX: ${t.charge_id}</div>`:''}
+        </div>`).join('')
+    : '<div class="empty"><div class="empty-icon" style="font-size:28px">📊</div><p>Транзакций нет</p></div>';
 
-    /* ═══════ AUDIT ═══════ */
-    async function loadAudit() {
-        const r = await fetch("/api/admin/data");
-        const d = await r.json();
-        document.getElementById("audit-tx").innerHTML = d.transactions.length
-            ? d.transactions.map(t => `
-                <div class="tx-row">
-                    <div class="tx-top">
-                        <div class="tx-name">Заказ #${t.id} — @${t.username}</div>
-                        <span class="badge badge-${t.status==="paid"?"paid":t.status==="declined"?"declined":"pending"}">
-                            ${t.status==="paid"?"✓ Оплачен":t.status==="declined"?"✗ Откл.":"⏳ Ожид."}
-                        </span>
-                    </div>
-                    <div class="tx-meta">${t.title||"—"} · ${t.type.toUpperCase()} · ${t.amount} ед.</div>
-                    ${t.charge_id ? `<div class="tx-id">TX: ${t.charge_id}</div>` : ""}
-                </div>
-            `).join("")
-            : `<div class="empty"><div class="empty-icon" style="font-size:28px">📊</div><p>Транзакций нет</p></div>`;
+  document.getElementById('audit-users').innerHTML = d.users.length
+    ? d.users.map(u=>`
+        <div class="user-row">
+          <div>
+            <div class="u-name">@${u.username||'unknown'}</div>
+            <div class="u-id">ID: ${u.user_id}</div>
+          </div>
+          <div class="u-bal">${u.balance} ₽</div>
+        </div>`).join('')
+    : '<div class="empty"><div class="empty-icon" style="font-size:28px">👥</div><p>Нет</p></div>';
+}
 
-        document.getElementById("audit-users").innerHTML = d.users.length
-            ? d.users.map(u => `
-                <div class="user-row">
-                    <div>
-                        <div class="u-name">@${u.username||"unknown"}</div>
-                        <div class="u-id">ID: ${u.user_id}</div>
-                    </div>
-                    <div class="u-bal">${u.balance} ₽</div>
-                </div>
-            `).join("")
-            : `<div class="empty"><div class="empty-icon" style="font-size:28px">👥</div><p>Пользователей нет</p></div>`;
-    }
+async function adjustBalance() {
+  const uid = document.getElementById('adm-uid').value;
+  const amt = document.getElementById('adm-amt').value;
+  if (!uid||!amt) { tg.showAlert('Заполните оба поля.'); return; }
+  const fd = new FormData();
+  fd.append('user_id',uid); fd.append('amount',amt);
+  const r = await fetch('/api/admin/change-balance',{method:'POST',body:fd});
+  if (r.ok) {
+    tg.showAlert('✅ Баланс обновлён!');
+    document.getElementById('adm-uid').value='';
+    document.getElementById('adm-amt').value='';
+  }
+}
 
-    /* ═══════ BALANCE ═══════ */
-    async function adjustBalance() {
-        const uid = document.getElementById("adm-uid").value;
-        const amt = document.getElementById("adm-amt").value;
-        if (!uid || !amt) { tg.showAlert("Заполните оба поля."); return; }
-        const fd = new FormData();
-        fd.append("user_id", uid);
-        fd.append("amount", amt);
-        const r = await fetch("/api/admin/change-balance", { method: "POST", body: fd });
-        if (r.ok) {
-            tg.showAlert("✅ Баланс обновлён!");
-            document.getElementById("adm-uid").value = "";
-            document.getElementById("adm-amt").value = "";
-        }
-    }
+/* ═══════════════════════════════════════════
+   PURCHASE FLOW
+═══════════════════════════════════════════ */
+async function triggerBuy(pid, type) {
+  if (type==='yoomoney') {
+    window.open('https://yoomoney.ru/fundraise/1HSLJ8JGS6P.260520','_blank');
+    tg.showPopup({
+      title:'💳 Оплата ЮMoney',
+      message:'Переведите сумму и нажмите «Я оплатил».',
+      buttons:[
+        {id:'paid',type:'default',text:'✅ Я оплатил'},
+        {type:'cancel',text:'Отмена'}
+      ]
+    }, btn => { if(btn==='paid') doPurchase(pid,'yoomoney'); });
+  } else {
+    doPurchase(pid, type);
+  }
+}
 
-    /* ═══════ BUY ═══════ */
-    async function triggerBuy(pid, type) {
-        if (type === "yoomoney") {
-            window.open("https://yoomoney.ru/fundraise/1HSLJ8JGS6P.260520", "_blank");
-            tg.showPopup({
-                title: "💳 Оплата ЮMoney",
-                message: "Переведите сумму. После успешного перевода нажмите «Я оплатил» — заявка уйдёт администратору.",
-                buttons: [
-                    { id: "paid", type: "default", text: "✅ Я оплатил" },
-                    { type: "cancel", text: "Отмена" }
-                ]
-            }, btn => { if (btn === "paid") doPurchase(pid, "yoomoney"); });
-        } else {
-            doPurchase(pid, type);
-        }
-    }
+async function doPurchase(pid, type) {
+  const res = await fetch('/api/buy', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ user_id:user.id, username:user.username, product_id:pid, type })
+  });
+  const d = await res.json();
+  if (d.error)               tg.showAlert('Ошибка: '+d.error);
+  else if (d.status==='invoice_sent') tg.close();
+  else tg.showAlert('✅ Заявка оформлена!\nПроверьте статус в Профиле или в боте.');
+}
 
-    async function doPurchase(pid, type) {
-        const res = await fetch("/api/buy", {
-            method: "POST", headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ user_id: user.id, username: user.username, product_id: pid, type })
-        });
-        const d = await res.json();
-        if (d.error) tg.showAlert("Ошибка: " + d.error);
-        else if (d.status === "invoice_sent") tg.close();
-        else tg.showAlert("✅ Заявка оформлена!\nПроверьте статус в Профиле или в диалоге с ботом.");
-    }
-
-    /* ═══════ UTILS ═══════ */
-    function esc(t) {
-        return (t||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-    }
+/* ═══════════════════════════════════════════
+   UTILS
+═══════════════════════════════════════════ */
+function esc(t) {
+  return String(t||'')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
 </script>
 </body>
 </html>
